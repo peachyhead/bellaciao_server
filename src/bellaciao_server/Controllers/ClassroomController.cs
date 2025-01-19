@@ -21,11 +21,11 @@ public class ClassroomController : ControllerBase
         return Ok("Test request successful!");
     }
 
-    /*[HttpGet]
+    [HttpGet]
     public ActionResult<List<Classroom>> GetAllClassrooms()
     {
-        return Ok(_context.Classrooms.Include(c => c.Participants).ToList());
-    }*/
+        return Ok(_context.Classrooms.ToList());
+    }
 
     [HttpPost("create-classroom")]
     public ActionResult CreateClassroom([FromBody] Classroom classroom)
