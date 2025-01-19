@@ -13,13 +13,21 @@ namespace Context
 
         public DbSet<User> Users { get; set; }
         public DbSet<Classroom> Classrooms { get; set; }
-    }   
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<User>().ToTable("users");
+            modelBuilder.Entity<Classroom>().ToTable("classrooms");
+        }
+    }
 
     public class User
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string Phone {get; set; }
+        public string Phone { get; set; }
         public string Role { get; set; } // e.g., "Tutor" or "Student"
     }
 
