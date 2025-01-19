@@ -21,18 +21,18 @@ public class ClassroomController : ControllerBase
         return Ok("Test request successful!");
     }
 
-    [HttpGet]
+    /*[HttpGet]
     public ActionResult<List<Classroom>> GetAllClassrooms()
     {
         return Ok(_context.Classrooms.Include(c => c.Participants).ToList());
-    }
+    }*/
 
     [HttpPost("create-classroom")]
     public ActionResult CreateClassroom([FromBody] Classroom classroom)
     {
         _context.Classrooms.Add(classroom);
         _context.SaveChanges();
-        return CreatedAtAction(nameof(GetAllClassrooms), new { id = classroom.Id }, classroom);
+        return CreatedAtAction(nameof(GetAllClassrooms), new { id = classroom.id }, classroom);
     }
 
     [HttpPost("add-user")]
@@ -40,7 +40,7 @@ public class ClassroomController : ControllerBase
     {
         _context.Users.Add(user);
         _context.SaveChanges();
-        return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+        return CreatedAtAction(nameof(GetUserById), new { id = user.id }, user);
     }
 
     [HttpGet("get-user/{id}")]

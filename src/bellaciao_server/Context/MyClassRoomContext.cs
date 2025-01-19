@@ -18,24 +18,41 @@ namespace Context
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<User>().ToTable("users");
-            modelBuilder.Entity<Classroom>().ToTable("classrooms");
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.ToTable("users");
+                entity.HasKey(e => e.id);
+                entity.Property(e => e.id).HasColumnName("id");
+                entity.Property(e => e.fullname).HasColumnName("fullname");
+                entity.Property(e => e.phone).HasColumnName("phone");
+                // entity.Property(e => e.Role).HasColumnName("role"); // Uncomment if Role is needed
+            });
+
+            modelBuilder.Entity<Classroom>(entity =>
+            {
+                entity.ToTable("classrooms");
+                entity.HasKey(e => e.id);
+                entity.Property(e => e.id).HasColumnName("id");
+                entity.Property(e => e.title).HasColumnName("title");
+                entity.Property(e => e.headid).HasColumnName("headid");
+                // entity.HasMany(e => e.Participants).WithOne().HasForeignKey("ClassroomId"); // Uncomment if Participants is needed
+            });
         }
     }
 
     public class User
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Phone { get; set; }
-        public string Role { get; set; } // e.g., "Tutor" or "Student"
+        public int id { get; set; }
+        public string fullname { get; set; }
+        public string phone { get; set; }
+        // public string Role { get; set; } // Uncomment if Role is needed
     }
 
     public class Classroom
     {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public int HeadID { get; set; }
-        public List<User> Participants { get; set; }
+        public int id { get; set; }
+        public string title { get; set; }
+        public int headid { get; set; }
+        // public List<User> Participants { get; set; } // Uncomment if Participants is needed
     }
 }
