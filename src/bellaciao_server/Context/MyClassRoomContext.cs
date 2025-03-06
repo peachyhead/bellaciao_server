@@ -29,7 +29,7 @@ namespace Context
                 entity.HasKey(e => e.id);
                 entity.Property(e => e.id).HasColumnName("id");
                 entity.Property(e => e.title).HasColumnName("title");
-                entity.Property(e => e.headid).HasColumnName("headid");
+                entity.Property(e => e.head_id).HasColumnName("headid");
                 // entity.HasMany(e => e.Participants).WithOne().HasForeignKey("ClassroomId"); // Uncomment if Participants is needed
             });
         }
