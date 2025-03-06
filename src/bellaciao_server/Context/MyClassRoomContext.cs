@@ -44,6 +44,17 @@ namespace Context
                 entity.Property(e => e.classroom_id).HasColumnName("classroom_id");
                 // entity.HasMany(e => e.Participants).WithOne().HasForeignKey("ClassroomId"); // Uncomment if Participants is needed
             });
+
+            modelBuilder.Entity<ClassUser>(entity =>
+            {
+                entity.ToTable("class_user");
+                entity.HasKey(e => e.classroom_id);
+                entity.Property(e => e.classroom_id).HasColumnName("classroom_id");
+                entity.Property(e => e.user_id).HasColumnName("user_id");
+                entity.Property(e => e.role).HasColumnName("role");
+                entity.Property(e => e.charge).HasColumnName("charge");
+                // entity.HasMany(e => e.Participants).WithOne().HasForeignKey("ClassroomId"); // Uncomment if Participants is needed
+            });
         }
     }
 
