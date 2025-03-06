@@ -28,16 +28,16 @@ public class ClassroomController : ControllerBase
         // Создаем запись в class_users, связывая пользователя head_id с классом
         var classUser = new ClassUser
         {
-            classroom_id = classroom.id,
-            user_id = classroom.head_id,
-            role = "teacher",
-            charge = default
+            ClassroomID = classroom.ID,
+            UserID = classroom.HeadID,
+            Role = "teacher",
+            Charge = default
         };
 
         _context.ClassUsers.Add(classUser);
         _context.SaveChanges();
 
-        return CreatedAtAction(nameof(GetAllClassrooms), new { classroom.id }, classroom);
+        return CreatedAtAction(nameof(GetAllClassrooms), new { classroom.ID }, classroom);
     }
 
     [HttpPost("add-user")]
@@ -45,7 +45,7 @@ public class ClassroomController : ControllerBase
     {
         _context.Users.Add(user);
         _context.SaveChanges();
-        return CreatedAtAction(nameof(GetUserById), new { user.id }, user);
+        return CreatedAtAction(nameof(GetUserById), new { user.ID }, user);
     }
 
     [HttpGet("get-user")]
@@ -78,9 +78,9 @@ public class ClassroomController : ControllerBase
         // Здесь можно сохранить приглашение в базу данных, если нужно
         var invite = new Invitation
         {
-            id = invitationId,
-            role = request.role,
-            classroom_id = request.classroom_id
+            ID = invitationId,
+            Role = request.role,
+            ClassroomID = request.classroom_id
         };
 
         _context.Invitations.Add(invite);
@@ -98,7 +98,7 @@ public class ClassroomController : ControllerBase
             return BadRequest("Invite ID and User ID are required.");
         }
 
-        var invitation = _context.Invitations.FirstOrDefault(i => i.id == invite_id);
+        var invitation = _context.Invitations.FirstOrDefault(i => i.ID == invite_id);
         if (invitation == null)
         {
             return NotFound("Invitation not found.");
@@ -106,10 +106,10 @@ public class ClassroomController : ControllerBase
 
         var classUser = new ClassUser
         {
-            classroom_id = invitation.classroom_id,
-            user_id = request.user_id,
-            role = invitation.role,
-            charge = default 
+            ClassroomID = invitation.ClassroomID,
+            UserID = request.user_id,
+            Role = invitation.Role,
+            Charge = default 
         };
 
         _context.ClassUsers.Add(classUser);
@@ -129,8 +129,8 @@ public class ClassroomController : ControllerBase
 
         // Находим все классы, в которых состоит пользователь
         var roomIds = _context.ClassUsers
-            .Where(cu => cu.user_id == user_id)
-            .Select(cu => cu.classroom_id)
+            .Where(cu => cu.UserID == user_id)
+            .Select(cu => cu.ClassroomID)
             .ToList();
 
         return Ok(new GetAvailableResponse { RoomIds = roomIds });
@@ -146,8 +146,8 @@ public class ClassroomController : ControllerBase
 
         // Получаем список пользователей по роли и ID комнаты
         var userIds = _context.ClassUsers
-            .Where(cu => cu.classroom_id == room_id && cu.role == role)
-            .Select(cu => cu.user_id)
+            .Where(cu => cu.ClassroomID == room_id && cu.Role == role)
+            .Select(cu => cu.UserID)
             .ToList();
 
         return Ok(new { users = userIds });
@@ -157,5 +157,21 @@ public class ClassroomController : ControllerBase
     public class GetAvailableResponse
     {
         public List<string> RoomIds { get; set; }
+    }
+
+    public class FollowRequest
+    {
+        public string user_id { get; set; }
+    }
+
+    public class InviteRequest
+    {
+        public string role { get; set; }
+        public string classroom_id { get; set; }
+    }
+
+    public class InviteResponse
+    {
+        public string invite_id { get; set; }
     }
 }

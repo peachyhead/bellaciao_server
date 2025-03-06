@@ -17,13 +17,12 @@ public class LessonController : ControllerBase
     {
         var lesson = new Lesson
         {
-            Id = Guid.NewGuid().ToString(),
-            RoomId = room_id,
-            TemplateId = request.TemplateId,
+            ID = Guid.NewGuid().ToString(),
+            RoomID = room_id,
+            TemplateID = request.TemplateId,
             TemplateArg = request.TemplateArg,
             Duration = request.Duration,
             Platform = request.Platform,
-            CreatedAt = DateTime.UtcNow
         };
 
         _context.Lessons.Add(lesson);
@@ -33,8 +32,8 @@ public class LessonController : ControllerBase
         {
             var lessonParticipant = new LessonParticipant
             {
-                LessonId = lesson.Id,
-                UserId = studentId,
+                LessonID = lesson.ID,
+                UserID = studentId,
                 Role = "student"
             };
 
@@ -43,15 +42,15 @@ public class LessonController : ControllerBase
 
         var teacherParticipant = new LessonParticipant
         {
-            LessonId = lesson.Id,
-            UserId = request.TeacherId,
+            LessonID = lesson.ID,
+            UserID = request.TeacherId,
             Role = "teacher"
         };
 
         _context.LessonParticipants.Add(teacherParticipant);
         _context.SaveChanges();
 
-        return Ok(new { lesson.Id });
+        return Ok(new { lesson.ID });
     }
 }
 
@@ -68,19 +67,27 @@ public class LessonRequest
 
 public class Lesson
 {
-    public string Id { get; set; }
-    public string RoomId { get; set; }
-    public int TemplateId { get; set; }
+    public string ID { get; set; }
+    public string RoomID { get; set; }
+    public int TemplateID { get; set; }
     public long TemplateArg { get; set; }
     public int Duration { get; set; }
     public string Platform { get; set; }
-    public DateTime CreatedAt { get; set; }
 }
 
 public class LessonParticipant
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
-    public string LessonId { get; set; }
-    public string UserId { get; set; }
+    public string UserID { get; set; }
+    public string LessonID { get; set; }
     public string Role { get; set; }
+}
+
+public class LessonCase
+{
+    public string LessonID { get; set; }
+    public string UserID { get; set; }
+    public string Description { get; set; }
+    public long CreatedAt { get; set; }
+    public long OldDate { get; set; }
+    public long NewDate { get; set; }
 }
