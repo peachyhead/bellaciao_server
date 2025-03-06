@@ -95,7 +95,7 @@ public class ClassroomController : ControllerBase
             classroom_id = invitation.classroom_id,
             user_id = request.user_id,
             role = invitation.role,
-            charge = "default" 
+            charge = default 
         };
 
         _context.ClassUsers.Add(classUser);
