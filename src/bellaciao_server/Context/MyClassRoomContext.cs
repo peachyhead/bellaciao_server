@@ -11,6 +11,9 @@ namespace Context
         public DbSet<Invitation> Invitations { get; set; }
         public DbSet<ClassUser> ClassUsers {get; set; }
 
+        public DbSet<Lesson> Lessons {get; set; }
+        public DbSet<LessonParticipant> LessonParticipants {get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
