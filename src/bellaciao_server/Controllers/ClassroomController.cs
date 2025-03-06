@@ -49,4 +49,30 @@ public class ClassroomController : ControllerBase
         }
         return Ok(user);
     }
+
+    [HttpPost("invite")]
+    public ActionResult<InviteResponse> InviteUser([FromBody] InviteRequest request)
+    {
+        if (string.IsNullOrEmpty(request.role) || string.IsNullOrEmpty(request.classroom_id))
+        {
+            return BadRequest("Role and Classroom ID are required.");
+        }
+
+        // Генерируем уникальный ID для приглашения
+        string invitationId = Guid.NewGuid().ToString();
+
+        // Здесь можно сохранить приглашение в базу данных, если нужно
+        var invite = new Invitation
+        {
+            id = invitationId,
+            role = request.role,
+            classroom_id = request.classroom_id
+        };
+
+        _context.Invitations.Add(invite);
+        _context.SaveChanges();
+
+        // Возвращаем ID приглашения
+        return Ok(new InviteResponse { invite_id = invitationId });
+    }
 }

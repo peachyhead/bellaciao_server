@@ -8,6 +8,7 @@ namespace Context
 
         public DbSet<User> Users { get; set; }
         public DbSet<Classroom> Classrooms { get; set; }
+        public DbSet<Invitation> Invitations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,6 +33,16 @@ namespace Context
                 entity.Property(e => e.head_id).HasColumnName("head_id");
                 // entity.HasMany(e => e.Participants).WithOne().HasForeignKey("ClassroomId"); // Uncomment if Participants is needed
             });
+
+            modelBuilder.Entity<Invitation>(entity =>
+            {
+                entity.ToTable("classroom_invites");
+                entity.HasKey(e => e.id);
+                entity.Property(e => e.id).HasColumnName("id");
+                entity.Property(e => e.role).HasColumnName("role");
+                entity.Property(e => e.classroom_id).HasColumnName("classroom_id");
+                // entity.HasMany(e => e.Participants).WithOne().HasForeignKey("ClassroomId"); // Uncomment if Participants is needed
+            });
         }
     }
 
@@ -49,5 +60,23 @@ namespace Context
         public string title { get; set; }
         public string head_id { get; set; }
         // public List<User> Participants { get; set; } // Uncomment if Participants is needed
+    }
+
+    public class InviteRequest
+    {
+        public string role { get; set; }
+        public string classroom_id { get; set; }
+    }
+
+    public class InviteResponse
+    {
+        public string invite_id { get; set; }
+    }
+
+    public class Invitation
+    {
+        public string id { get; set; }
+        public string role { get; set; }
+        public string classroom_id { get; set; }
     }
 }
