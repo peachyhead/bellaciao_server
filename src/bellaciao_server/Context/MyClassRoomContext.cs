@@ -45,7 +45,7 @@ namespace Context
 
     public class Classroom
     {
-        public int id { get; set; }
+        public string id { get; set; }
         public string title { get; set; }
         public string headid { get; set; }
         // public List<User> Participants { get; set; } // Uncomment if Participants is needed
