@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Context;
 
 [ApiController]
-[Route("api/classroom")]
+[Route("api/[controller]")]
 public class ClassroomController : ControllerBase
 {
     private readonly MyClassroomContext _context;
