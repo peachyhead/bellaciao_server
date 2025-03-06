@@ -47,7 +47,7 @@ namespace Context
 
             modelBuilder.Entity<ClassUser>(entity =>
             {
-                entity.ToTable("class_user");
+                entity.ToTable("class_users");
                 entity.HasKey(e => e.classroom_id);
                 entity.Property(e => e.classroom_id).HasColumnName("classroom_id");
                 entity.Property(e => e.user_id).HasColumnName("user_id");
