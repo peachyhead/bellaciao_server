@@ -1,8 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Context;
-using System.Collections.Generic;
-using System.Linq;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -32,7 +29,7 @@ public class ClassroomController : ControllerBase
     {
         _context.Classrooms.Add(classroom);
         _context.SaveChanges();
-        return CreatedAtAction(nameof(GetAllClassrooms), new { id = classroom.id }, classroom);
+        return CreatedAtAction(nameof(GetAllClassrooms), new { classroom.id }, classroom);
     }
 
     [HttpPost("add-user")]
@@ -40,11 +37,11 @@ public class ClassroomController : ControllerBase
     {
         _context.Users.Add(user);
         _context.SaveChanges();
-        return CreatedAtAction(nameof(GetUserById), new { id = user.id }, user);
+        return CreatedAtAction(nameof(GetUserById), new { user.id }, user);
     }
 
     [HttpGet("get-user/{id}")]
-    public ActionResult<User> GetUserById(int id)
+    public ActionResult<User> GetUserById(string id)
     {
         var user = _context.Users.Find(id);
         if (user == null)
