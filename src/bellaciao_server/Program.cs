@@ -24,4 +24,4 @@ app.UseEndpoints(endpoints =>
     endpoints.MapControllers();
 });
 
-app.Run("https://localhost:7111");
+app.Run("https://0.0.0.0:5000");
