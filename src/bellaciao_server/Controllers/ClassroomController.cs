@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Context;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/classroom")]
 public class ClassroomController : ControllerBase
 {
     private readonly MyClassroomContext _context;
@@ -40,9 +40,14 @@ public class ClassroomController : ControllerBase
         return CreatedAtAction(nameof(GetUserById), new { user.id }, user);
     }
 
-    [HttpGet("get-user/{id}")]
-    public ActionResult<User> GetUserById(string id)
+    [HttpGet("get-user")]
+    public ActionResult<User> GetUserById([FromQuery] string id)
     {
+        if (string.IsNullOrEmpty(id))
+        {
+            return BadRequest("ID is required.");
+        }
+
         var user = _context.Users.Find(id);
         if (user == null)
         {
