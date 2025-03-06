@@ -9,6 +9,7 @@ namespace Context
         public DbSet<User> Users { get; set; }
         public DbSet<Classroom> Classrooms { get; set; }
         public DbSet<Invitation> Invitations { get; set; }
+        public DbSet<ClassUser> ClassUsers {get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -78,5 +79,18 @@ namespace Context
         public string id { get; set; }
         public string role { get; set; }
         public string classroom_id { get; set; }
+    }
+
+    public class FollowRequest
+    {
+        public string user_id { get; set; }
+    }
+
+    public class ClassUser
+    {
+        public string classroom_id { get; set; }
+        public string user_id { get; set; }
+        public string role { get; set; }
+        public string charge { get; set; }
     }
 }

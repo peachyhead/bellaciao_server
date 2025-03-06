@@ -75,4 +75,33 @@ public class ClassroomController : ControllerBase
         // Возвращаем ID приглашения
         return Ok(new InviteResponse { invite_id = invitationId });
     }
+
+    [HttpPost("follow")]
+    public ActionResult FollowInvitation([FromQuery] string invite_id, [FromBody] FollowRequest request)
+    {
+        if (string.IsNullOrEmpty(invite_id) || string.IsNullOrEmpty(request.user_id))
+        {
+            return BadRequest("Invite ID and User ID are required.");
+        }
+
+        var invitation = _context.Invitations.FirstOrDefault(i => i.id == invite_id);
+        if (invitation == null)
+        {
+            return NotFound("Invitation not found.");
+        }
+
+        var classUser = new ClassUser
+        {
+            classroom_id = invitation.classroom_id,
+            user_id = request.user_id,
+            role = invitation.role,
+            charge = "default" 
+        };
+
+        _context.ClassUsers.Add(classUser);
+        _context.Invitations.Remove(invitation);
+
+        _context.SaveChanges();
+        return Ok("User successfully added to the classroom.");
+    }
 }
