@@ -19,16 +19,16 @@ public class LessonController : ControllerBase
         {
             ID = Guid.NewGuid().ToString(),
             RoomID = room_id,
-            TemplateID = request.TemplateId,
-            TemplateArg = request.TemplateArg,
-            Duration = request.Duration,
-            Platform = request.Platform,
+            TemplateID = request.template_id,
+            TemplateArg = request.template_arg,
+            Duration = request.duration,
+            Platform = request.platform,
         };
 
         _context.Lessons.Add(lesson);
         _context.SaveChanges();
 
-        foreach (var studentId in request.StudentIds)
+        foreach (var studentId in request.student_ids)
         {
             var lessonParticipant = new LessonParticipant
             {
@@ -43,7 +43,7 @@ public class LessonController : ControllerBase
         var teacherParticipant = new LessonParticipant
         {
             LessonID = lesson.ID,
-            UserID = request.TeacherId,
+            UserID = request.teacher_id,
             Role = "teacher"
         };
 
@@ -57,12 +57,12 @@ public class LessonController : ControllerBase
 // DTO для запроса
 public class LessonRequest
 {
-    public int TemplateId { get; set; }
-    public long TemplateArg { get; set; }
-    public int Duration { get; set; }
-    public string Platform { get; set; }
-    public string TeacherId { get; set; }
-    public List<string> StudentIds { get; set; }
+    public int template_id { get; set; }
+    public long template_arg { get; set; }
+    public int duration { get; set; }
+    public string platform { get; set; }
+    public string teacher_id { get; set; }
+    public List<string> student_ids { get; set; }
 }
 
 public class Lesson
