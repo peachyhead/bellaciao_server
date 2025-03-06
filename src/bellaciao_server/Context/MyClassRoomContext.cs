@@ -62,7 +62,7 @@ namespace Context
                 entity.Property(e => e.ID).HasColumnName("id");
                 entity.Property(e => e.TemplateID).HasColumnName("template_id");
                 entity.Property(e => e.TemplateArg).HasColumnName("template_arg");
-                entity.Property(e => e.RoomID).HasColumnName("room_id");
+                entity.Property(e => e.RoomID).HasColumnName("classroom_id");
                 entity.Property(e => e.Duration).HasColumnName("duration");
                 entity.Property(e => e.Platform).HasColumnName("platform"); 
             });
