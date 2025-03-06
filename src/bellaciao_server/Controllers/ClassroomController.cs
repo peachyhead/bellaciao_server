@@ -12,12 +12,6 @@ public class ClassroomController : ControllerBase
         _context = context;
     }
 
-    [HttpGet("test")]
-    public ActionResult<string> Test()
-    {
-        return Ok("Test request successful!");
-    }
-
     [HttpGet]
     public ActionResult<List<Classroom>> GetAllClassrooms()
     {
