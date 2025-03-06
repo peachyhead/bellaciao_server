@@ -47,7 +47,7 @@ namespace Context
     {
         public string id { get; set; }
         public string title { get; set; }
-        public string headid { get; set; }
+        public string head_id { get; set; }
         // public List<User> Participants { get; set; } // Uncomment if Participants is needed
     }
 }
