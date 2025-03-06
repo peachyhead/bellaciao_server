@@ -9,6 +9,14 @@ builder.Services.AddDbContext<MyClassroomContext>(options =>
 
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader());
+});
+
 var app = builder.Build();
 
 // Configure middleware
@@ -18,6 +26,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+
+// Включаем CORS перед обработкой запросов
+app.UseCors("AllowAll");
 
 app.UseEndpoints(endpoints =>
 {
