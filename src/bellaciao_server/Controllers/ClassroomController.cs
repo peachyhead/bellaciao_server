@@ -136,6 +136,23 @@ public class ClassroomController : ControllerBase
         return Ok(new GetAvailableResponse { RoomIds = roomIds });
     }
 
+    [HttpGet("get-users")]
+    public ActionResult<object> GetUsersByRole([FromQuery] string role, [FromQuery] string room_id)
+    {
+        if (string.IsNullOrEmpty(role) || string.IsNullOrEmpty(room_id))
+        {
+            return BadRequest("role and room_id parameters are required.");
+        }
+
+        // Получаем список пользователей по роли и ID комнаты
+        var userIds = _context.ClassUsers
+            .Where(cu => cu.classroom_id == room_id && cu.role == role)
+            .Select(cu => cu.user_id)
+            .ToList();
+
+        return Ok(new { users = userIds });
+    }
+
     // Класс для ответа
     public class GetAvailableResponse
     {
