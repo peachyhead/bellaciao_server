@@ -1,9 +1,4 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System.Collections.Generic;
 
 namespace Context
 {
@@ -42,7 +37,7 @@ namespace Context
 
     public class User
     {
-        public int id { get; set; }
+        public string id { get; set; }
         public string fullname { get; set; }
         public string phone { get; set; }
         // public string Role { get; set; } // Uncomment if Role is needed
@@ -52,7 +47,7 @@ namespace Context
     {
         public int id { get; set; }
         public string title { get; set; }
-        public int headid { get; set; }
+        public string headid { get; set; }
         // public List<User> Participants { get; set; } // Uncomment if Participants is needed
     }
 }
