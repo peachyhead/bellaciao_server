@@ -21,8 +21,22 @@ public class ClassroomController : ControllerBase
     [HttpPost("create-classroom")]
     public ActionResult CreateClassroom([FromBody] Classroom classroom)
     {
+        // Добавляем новую комнату в базу
         _context.Classrooms.Add(classroom);
         _context.SaveChanges();
+
+        // Создаем запись в class_users, связывая пользователя head_id с классом
+        var classUser = new ClassUser
+        {
+            classroom_id = classroom.id,
+            user_id = classroom.head_id,
+            role = "teacher",
+            charge = default
+        };
+
+        _context.ClassUsers.Add(classUser);
+        _context.SaveChanges();
+
         return CreatedAtAction(nameof(GetAllClassrooms), new { classroom.id }, classroom);
     }
 
@@ -103,5 +117,28 @@ public class ClassroomController : ControllerBase
 
         _context.SaveChanges();
         return Ok("User successfully added to the classroom.");
+    }
+
+    [HttpGet("get-available")]
+    public ActionResult<GetAvailableResponse> GetAvailableClassrooms([FromQuery] string user_id)
+    {
+        if (string.IsNullOrEmpty(user_id))
+        {
+            return BadRequest("User ID is required.");
+        }
+
+        // Находим все классы, в которых состоит пользователь
+        var roomIds = _context.ClassUsers
+            .Where(cu => cu.user_id == user_id)
+            .Select(cu => cu.classroom_id)
+            .ToList();
+
+        return Ok(new GetAvailableResponse { RoomIds = roomIds });
+    }
+
+    // Класс для ответа
+    public class GetAvailableResponse
+    {
+        public List<string> RoomIds { get; set; }
     }
 }
