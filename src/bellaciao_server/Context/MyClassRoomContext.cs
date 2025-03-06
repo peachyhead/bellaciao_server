@@ -71,6 +71,7 @@ namespace Context
             {
                 entity.ToTable("lesson_participants");
                 entity.HasKey(e => e.ID);
+                entity.Property(e => e.ID).HasColumnName("id");
                 entity.Property(e => e.UserID).HasColumnName("user_id");
                 entity.Property(e => e.LessonID).HasColumnName("lesson_id");
                 entity.Property(e => e.Role).HasColumnName("role");
@@ -79,7 +80,7 @@ namespace Context
             modelBuilder.Entity<LessonCase>(entity =>
             {
                 entity.ToTable("lesson_cases");
-                entity.HasKey(e => e.ID);
+                entity.Property(e => e.ID).HasColumnName("id");
                 entity.Property(e => e.LessonID).HasColumnName("lesson_id");
                 entity.Property(e => e.UserID).HasColumnName("user_id");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at");
