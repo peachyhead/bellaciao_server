@@ -77,6 +77,7 @@ public class Lesson
 
 public class LessonParticipant
 {
+    public int ID { get; set; }
     public string UserID { get; set; }
     public string LessonID { get; set; }
     public string Role { get; set; }
@@ -84,6 +85,7 @@ public class LessonParticipant
 
 public class LessonCase
 {
+    public int ID { get; set; }
     public string LessonID { get; set; }
     public string UserID { get; set; }
     public string Description { get; set; }
