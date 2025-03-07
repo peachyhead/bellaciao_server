@@ -105,7 +105,7 @@ public class LessonController : ControllerBase
 
         if (lesson == null)
         {
-            return NotFound($"Lesson not found. Lessons: {report}");
+            return NotFound(new { message = $"Lesson not found. Lessons: {report}"});
         }
 
         var lessonCase = new LessonCase
@@ -124,7 +124,6 @@ public class LessonController : ControllerBase
 
         return Ok(new { message = "Lesson case added successfully", case_id = lessonCase.ID });
     }
-
 }
 
 public class LessonCaseRequest
