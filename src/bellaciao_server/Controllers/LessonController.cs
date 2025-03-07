@@ -1,3 +1,5 @@
+using System.Text;
+
 using Context;
 using Microsoft.AspNetCore.Mvc;
 
@@ -94,9 +96,16 @@ public class LessonController : ControllerBase
     public ActionResult AddLessonCase([FromQuery] string lesson_id, [FromBody] LessonCaseRequest request)
     {
         var lesson = _context.Lessons.FirstOrDefault(l => l.ID == lesson_id);
+        var report = new StringBuilder();
+
+        foreach (var l in _context.Lessons)
+        {
+            report.AppendLine(l.ID);
+        }
+
         if (lesson == null)
         {
-            return NotFound("Lesson not found");
+            return NotFound($"Lesson not found. Lessons: {report}");
         }
 
         var lessonCase = new LessonCase
