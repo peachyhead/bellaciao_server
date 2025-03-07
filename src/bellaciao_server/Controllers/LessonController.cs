@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 
 using Context;
 using Microsoft.AspNetCore.Mvc;
@@ -129,6 +130,8 @@ public class LessonController : ControllerBase
 public class LessonCaseRequest
 {
     public string Type { get; set; }
+    
+    [JsonPropertyName("student_id")]
     public string StudentID { get; set; }
     public string Description { get; set; }
     public long CreatedAt { get; set; }
