@@ -13,6 +13,7 @@ namespace Context
 
         public DbSet<Lesson> Lessons {get; set; }
         public DbSet<LessonParticipant> LessonParticipants {get; set; }
+        public DbSet<LessonCase> LessonCases {get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -80,7 +81,9 @@ namespace Context
             modelBuilder.Entity<LessonCase>(entity =>
             {
                 entity.ToTable("lesson_cases");
+                entity.HasKey(e => e.ID);
                 entity.Property(e => e.ID).HasColumnName("id");
+                entity.Property(e => e.Type).HasColumnName("type");
                 entity.Property(e => e.LessonID).HasColumnName("lesson_id");
                 entity.Property(e => e.UserID).HasColumnName("user_id");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at");
