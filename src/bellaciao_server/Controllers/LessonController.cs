@@ -87,8 +87,45 @@ public class LessonController : ControllerBase
         })
         .ToList();
 
-    return Ok(lessons);
+        return Ok(lessons);
+    }
+
+    [HttpPost("add-case")]
+    public ActionResult AddLessonCase([FromQuery] string lesson_id, [FromBody] LessonCaseRequest request)
+    {
+        var lesson = _context.Lessons.FirstOrDefault(l => l.ID == lesson_id);
+        if (lesson == null)
+        {
+            return NotFound("Lesson not found");
+        }
+
+        var lessonCase = new LessonCase
+        {
+            LessonID = lesson_id,
+            Type = request.Type,
+            StudentID = request.StudentID,
+            Description = request.Description,
+            CreatedAt = request.CreatedAt,
+            OldDate = request.OldDate,
+            NewDate = request.NewDate
+        };
+
+        _context.LessonCases.Add(lessonCase);
+        _context.SaveChanges();
+
+        return Ok(new { message = "Lesson case added successfully", case_id = lessonCase.ID });
+    }
+
 }
+
+public class LessonCaseRequest
+{
+    public string Type { get; set; }
+    public string StudentID { get; set; }
+    public string Description { get; set; }
+    public long CreatedAt { get; set; }
+    public long? OldDate { get; set; }
+    public long? NewDate { get; set; }
 }
 
 // DTO для ответа
@@ -110,8 +147,8 @@ public class LessonCaseResponse
     public long Date { get; set; }
     public string Description { get; set; }
     public long CreatedAt { get; set; }
-    public long OldDate { get; set; }
-    public long NewDate { get; set; }
+    public long? OldDate { get; set; }
+    public long? NewDate { get; set; }
 }
 
 // DTO для запроса
@@ -151,6 +188,6 @@ public class LessonCase
     public string StudentID { get; set; }
     public string Description { get; set; }
     public long CreatedAt { get; set; }
-    public long OldDate { get; set; }
-    public long NewDate { get; set; }
+    public long? OldDate { get; set; }
+    public long? NewDate { get; set; }
 }
