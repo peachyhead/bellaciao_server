@@ -85,7 +85,7 @@ namespace Context
                 entity.Property(e => e.ID).HasColumnName("id");
                 entity.Property(e => e.Type).HasColumnName("type");
                 entity.Property(e => e.LessonID).HasColumnName("lesson_id");
-                entity.Property(e => e.UserID).HasColumnName("user_id");
+                entity.Property(e => e.StudentID).HasColumnName("student_id");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at");
                 entity.Property(e => e.NewDate).HasColumnName("new_date");
                 entity.Property(e => e.OldDate).HasColumnName("old_date");

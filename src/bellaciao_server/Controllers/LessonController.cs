@@ -77,7 +77,7 @@ public class LessonController : ControllerBase
                 .Select(c => new LessonCaseResponse
                 {
                     Type = c.Type,
-                    UserID = c.UserID,
+                    UserID = c.StudentID,
                     Date = c.CreatedAt,
                     Description = c.Description,
                     OldDate = c.OldDate,
@@ -148,7 +148,7 @@ public class LessonCase
     public int ID { get; set; }
     public string Type { get; set; }
     public string LessonID { get; set; }
-    public string UserID { get; set; }
+    public string StudentID { get; set; }
     public string Description { get; set; }
     public long CreatedAt { get; set; }
     public long OldDate { get; set; }
