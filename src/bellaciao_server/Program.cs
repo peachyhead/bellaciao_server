@@ -12,9 +12,10 @@ builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader());
+    policy.AllowAnyOrigin()
+          .AllowAnyMethod()
+          .AllowAnyHeader()
+          .WithExposedHeaders("Content-Disposition"));
 });
 
 var app = builder.Build();
@@ -25,11 +26,9 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-app.UseRouting();
-
 // Включаем CORS перед обработкой запросов
 app.UseCors("AllowAll");
-
+app.UseRouting();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
