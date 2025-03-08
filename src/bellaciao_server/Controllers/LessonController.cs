@@ -259,6 +259,7 @@ public class LessonCase
 public class LessonCaseFile
 {
     public int ID { get; set; }
+    [JsonPropertyName("lesson_case_id")]
     public string LessonCaseID { get; set; }  // ID из lesson_cases
     public string FilePath { get; set; }   // Путь к файлу
 }
