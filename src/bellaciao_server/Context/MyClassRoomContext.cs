@@ -14,6 +14,7 @@ namespace Context
         public DbSet<Lesson> Lessons {get; set; }
         public DbSet<LessonParticipant> LessonParticipants {get; set; }
         public DbSet<LessonCase> LessonCases {get; set; }
+        public DbSet<LessonCaseFile> LessonCaseFiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -61,8 +62,8 @@ namespace Context
                 entity.ToTable("lessons");
                 entity.HasKey(e => e.ID);
                 entity.Property(e => e.ID).HasColumnName("id");
-                entity.Property(e => e.TemplateID).HasColumnName("template_id");
-                entity.Property(e => e.TemplateArg).HasColumnName("template_arg");
+                entity.Property(e => e.PeriodicType).HasColumnName("periodic_type");
+                entity.Property(e => e.PeriodicTime).HasColumnName("periodic_time");
                 entity.Property(e => e.RoomID).HasColumnName("classroom_id");
                 entity.Property(e => e.Duration).HasColumnName("duration");
                 entity.Property(e => e.Platform).HasColumnName("platform"); 
@@ -90,6 +91,15 @@ namespace Context
                 entity.Property(e => e.NewDate).HasColumnName("new_date");
                 entity.Property(e => e.OldDate).HasColumnName("old_date");
                 entity.Property(e => e.Description).HasColumnName("description");
+            });
+
+            modelBuilder.Entity<LessonCaseFile>(entity =>
+            {
+                entity.ToTable("lesson_case_files");
+                entity.HasKey(e => e.ID);
+                entity.Property(e => e.ID).HasColumnName("id");
+                entity.Property(e => e.LessonCaseID).HasColumnName("lesson_case_id");
+                entity.Property(e => e.FilePath).HasColumnName("file_path");
             });
         }
     }

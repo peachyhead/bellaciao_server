@@ -22,16 +22,16 @@ public class LessonController : ControllerBase
         {
             ID = Guid.NewGuid().ToString(),
             RoomID = room_id,
-            TemplateID = request.template_id,
-            TemplateArg = request.template_arg,
-            Duration = request.duration,
-            Platform = request.platform,
+            PeriodicType = request.PeriodicType,
+            PeriodicTime = request.PeriodicTime,
+            Duration = request.Duration,
+            Platform = request.Platform,
         };
 
         _context.Lessons.Add(lesson);
         _context.SaveChanges();
 
-        foreach (var studentId in request.student_ids)
+        foreach (var studentId in request.StudentIDs)
         {
             var lessonParticipant = new LessonParticipant
             {
@@ -46,7 +46,7 @@ public class LessonController : ControllerBase
         var teacherParticipant = new LessonParticipant
         {
             LessonID = lesson.ID,
-            UserID = request.teacher_id,
+            UserID = request.TeacherID,
             Role = "teacher"
         };
 
@@ -63,30 +63,30 @@ public class LessonController : ControllerBase
             .Where(l => l.RoomID == room_id)
             .Select(l => new LessonResponse
             {
-            LessonID = l.ID,
-            TeacherID = _context.LessonParticipants
-                .Where(lp => lp.LessonID == l.ID && lp.Role == "teacher")
-                .Select(lp => lp.UserID)
-                .First(),
-            Platform = l.Platform,
-            StudentIDs = _context.LessonParticipants
-                .Where(lp => lp.LessonID == l.ID && lp.Role == "student")
-                .Select(lp => lp.UserID)
-                .ToList(),
-            TemplateID = l.TemplateID,
-            TemplateArg = l.TemplateArg,
-            Cases = _context.LessonCases
-                .Where(c => c.LessonID == l.ID)
-                .Select(c => new LessonCaseResponse
-                {
-                    Type = c.Type,
-                    UserID = c.StudentID,
-                    Date = c.CreatedAt,
-                    Description = c.Description,
-                    OldDate = c.OldDate,
-                    NewDate = c.NewDate
-                })
-                .ToList()
+                LessonID = l.ID,
+                TeacherID = _context.LessonParticipants
+                    .Where(lp => lp.LessonID == l.ID && lp.Role == "teacher")
+                    .Select(lp => lp.UserID)
+                    .First(),
+                Platform = l.Platform,
+                StudentIDs = _context.LessonParticipants
+                    .Where(lp => lp.LessonID == l.ID && lp.Role == "student")
+                    .Select(lp => lp.UserID)
+                    .ToList(),
+                PeriodicType = l.PeriodicType,
+                PeriodicTime = l.PeriodicTime,
+                Cases = _context.LessonCases
+                    .Where(c => c.LessonID == l.ID)
+                    .Select(c => new LessonCaseResponse
+                    {
+                        Type = c.Type,
+                        UserID = c.StudentID,
+                        Date = c.CreatedAt,
+                        Description = c.Description,
+                        OldDate = c.OldDate,
+                        NewDate = c.NewDate
+                    })
+                    .ToList()
         })
         .ToList();
 
@@ -97,25 +97,20 @@ public class LessonController : ControllerBase
     public ActionResult AddLessonCase([FromQuery] string lesson_id, [FromBody] LessonCaseRequest request)
     {
         var lesson = _context.Lessons.FirstOrDefault(l => l.ID == lesson_id);
-        var report = new StringBuilder();
-
-        foreach (var l in _context.Lessons)
-        {
-            report.AppendLine(l.ID);
-        }
 
         if (lesson == null)
         {
-            return NotFound(new { message = $"Lesson not found. Lessons: {report}"});
+            return NotFound(new { message = $"Lesson not found."});
         }
-
+        var current = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds();
         var lessonCase = new LessonCase
         {
+            ID = Guid.NewGuid().ToString(),
             LessonID = lesson_id,
             Type = request.Type,
             StudentID = request.StudentID,
             Description = request.Description,
-            CreatedAt = request.CreatedAt,
+            CreatedAt = current,
             OldDate = request.OldDate,
             NewDate = request.NewDate
         };
@@ -124,6 +119,61 @@ public class LessonController : ControllerBase
         _context.SaveChanges();
 
         return Ok(new { message = "Lesson case added successfully", case_id = lessonCase.ID });
+    }
+
+    [HttpPost("upload-receipt")]
+    public async Task<IActionResult> UploadReceipt([FromQuery] string lesson_case_id, IFormFile file)
+    {
+        var lessonCase = _context.LessonCases.FirstOrDefault(lc => lc.ID == lesson_case_id);
+        if (lessonCase == null)
+        {
+            return NotFound(new { message = "Lesson case not found" });
+        }
+
+        var uploadPath = Path.Combine("uploads", "receipts");
+        if (!Directory.Exists(uploadPath))
+        {
+            Directory.CreateDirectory(uploadPath);
+        }
+
+        var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+        var filePath = Path.Combine(uploadPath, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        var receipt = new LessonCaseFile
+        {
+            LessonCaseID = lesson_case_id,
+            FilePath = filePath
+        };
+
+        _context.LessonCaseFiles.Add(receipt);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Receipt uploaded successfully", file_id = receipt.ID });
+    }
+
+    [HttpGet("download-receipt")]
+    public IActionResult DownloadReceipt([FromQuery] string lesson_case_id)
+    {
+        var receipt = _context.LessonCaseFiles.FirstOrDefault(r => r.LessonCaseID == lesson_case_id);
+        if (receipt == null)
+        {
+            return NotFound(new { message = "Receipt not found" });
+        }
+
+        var filePath = receipt.FilePath;
+        if (!System.IO.File.Exists(filePath))
+        {
+            return NotFound(new { message = "File not found on server" });
+        }
+
+        var fileBytes = System.IO.File.ReadAllBytes(filePath);
+        var fileName = Path.GetFileName(filePath);
+        return File(fileBytes, "application/octet-stream", fileName);
     }
 }
 
@@ -146,8 +196,8 @@ public class LessonResponse
     public string TeacherID { get; set; }
     public string Platform { get; set; }
     public List<string> StudentIDs { get; set; }
-    public int TemplateID { get; set; }
-    public string TemplateArg { get; set; }
+    public string PeriodicType { get; set; }
+    public long PeriodicTime { get; set; }
     public List<LessonCaseResponse> Cases { get; set; }
 }
 
@@ -165,20 +215,20 @@ public class LessonCaseResponse
 // DTO для запроса
 public class LessonRequest
 {
-    public int template_id { get; set; }
-    public string template_arg { get; set; }
-    public int duration { get; set; }
-    public string platform { get; set; }
-    public string teacher_id { get; set; }
-    public List<string> student_ids { get; set; }
+    public string PeriodicType { get; set; }
+    public long PeriodicTime { get; set; }
+    public int Duration { get; set; }
+    public string Platform { get; set; }
+    public string TeacherID { get; set; }
+    public List<string> StudentIDs { get; set; }
 }
 
 public class Lesson
 {
     public string ID { get; set; }
     public string RoomID { get; set; }
-    public int TemplateID { get; set; }
-    public string TemplateArg { get; set; }
+    public string PeriodicType { get; set; }
+    public long PeriodicTime { get; set; }
     public int Duration { get; set; }
     public string Platform { get; set; }
 }
@@ -193,7 +243,7 @@ public class LessonParticipant
 
 public class LessonCase
 {
-    public int ID { get; set; }
+    public string ID { get; set; }
     public string Type { get; set; }
     public string LessonID { get; set; }
     public string StudentID { get; set; }
@@ -201,4 +251,11 @@ public class LessonCase
     public long CreatedAt { get; set; }
     public long? OldDate { get; set; }
     public long? NewDate { get; set; }
+}
+
+public class LessonCaseFile
+{
+    public int ID { get; set; }
+    public string LessonCaseID { get; set; }  // ID из lesson_cases
+    public string FilePath { get; set; }   // Путь к файлу
 }
