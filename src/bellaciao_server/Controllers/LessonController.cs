@@ -217,8 +217,11 @@ public class LessonRequest
 {
     [JsonPropertyName("periodic_type")]
     public string PeriodicType { get; set; }
+    [JsonPropertyName("periodic_time")]
     public long PeriodicTime { get; set; }
+    [JsonPropertyName("duration")]
     public int Duration { get; set; }
+    [JsonPropertyName("platform")]
     public string Platform { get; set; }
     [JsonPropertyName("teacher_id")]
     public string TeacherID { get; set; }
