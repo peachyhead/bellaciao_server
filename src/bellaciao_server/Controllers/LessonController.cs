@@ -179,7 +179,6 @@ public class LessonController : ControllerBase
 
 public class LessonCaseRequest
 {
-    public string ID { get; set; }
     public string Type { get; set; }
     
     [JsonPropertyName("student_id")]
