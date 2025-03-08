@@ -95,7 +95,7 @@ namespace Context
 
             modelBuilder.Entity<LessonCaseFile>(entity =>
             {
-                entity.ToTable("lesson_case_files");
+                entity.ToTable("lesson_receipts");
                 entity.HasKey(e => e.ID);
                 entity.Property(e => e.ID).HasColumnName("id");
                 entity.Property(e => e.LessonCaseID).HasColumnName("lesson_case_id");
