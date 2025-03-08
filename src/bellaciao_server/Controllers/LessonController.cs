@@ -215,11 +215,14 @@ public class LessonCaseResponse
 // DTO для запроса
 public class LessonRequest
 {
+    [JsonPropertyName("periodic_type")]
     public string PeriodicType { get; set; }
     public long PeriodicTime { get; set; }
     public int Duration { get; set; }
     public string Platform { get; set; }
+    [JsonPropertyName("teacher_id")]
     public string TeacherID { get; set; }
+    [JsonPropertyName("student_ids")]
     public List<string> StudentIDs { get; set; }
 }
 
