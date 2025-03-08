@@ -94,9 +94,9 @@ public class LessonController : ControllerBase
     }
 
     [HttpPost("add-case")]
-    public ActionResult AddLessonCase([FromQuery] string lesson_id, [FromBody] LessonCaseRequest request)
+    public ActionResult AddLessonCase([FromQuery] string lesson_case_id, [FromBody] LessonCaseRequest request)
     {
-        var lesson = _context.Lessons.FirstOrDefault(l => l.ID == lesson_id);
+        var lesson = _context.LessonCases.FirstOrDefault(l => l.ID == lesson_case_id);
 
         if (lesson == null)
         {
@@ -106,7 +106,7 @@ public class LessonController : ControllerBase
         var lessonCase = new LessonCase
         {
             ID = Guid.NewGuid().ToString(),
-            LessonID = lesson_id,
+            LessonID = lesson_case_id,
             Type = request.Type,
             StudentID = request.StudentID,
             Description = request.Description,
