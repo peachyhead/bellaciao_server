@@ -7,6 +7,7 @@ namespace Context
         public MyClassroomContext(DbContextOptions<MyClassroomContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
+        
         public DbSet<Classroom> Classrooms { get; set; }
         public DbSet<Invitation> Invitations { get; set; }
         public DbSet<ClassUser> ClassUsers {get; set; }
