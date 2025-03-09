@@ -104,6 +104,13 @@ public class ClassroomController : ControllerBase
             return NotFound("Invitation not found.");
         }
 
+        // Проверяем, есть ли уже такой пользователь в классе
+        bool userExists = _context.ClassUsers.Any(cu => cu.ClassroomID == invitation.ClassroomID && cu.UserID == request.user_id);
+        if (userExists)
+        {
+            return Conflict(new { message = "User is already in the classroom.", classroom_id = invitation.ClassroomID });
+        }
+
         var classUser = new ClassUser
         {
             ClassroomID = invitation.ClassroomID,
