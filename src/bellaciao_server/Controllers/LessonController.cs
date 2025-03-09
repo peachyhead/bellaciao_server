@@ -227,12 +227,12 @@ public class LessonController : ControllerBase
     [HttpPost("add-case")]
     public ActionResult AddLessonCase([FromQuery] string lesson_id, [FromBody] LessonCaseRequest request)
     {
-        var lesson = _context.LessonCases.FirstOrDefault(l => l.ID == lesson_id);
-
+        var lesson = _context.Lessons.FirstOrDefault(l => l.ID == lesson_id);
         if (lesson == null)
         {
             return NotFound(new { message = $"Lesson not found."});
         }
+        
         var current = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds();
         var lessonCase = new LessonCase
         {
