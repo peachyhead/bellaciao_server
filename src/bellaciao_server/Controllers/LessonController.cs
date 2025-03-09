@@ -53,22 +53,31 @@ public class LessonController : ControllerBase
             Role = "teacher"
         });
 
-        foreach (var studentId in request.StudentIDs)
+        if (request.StudentIDs.Any())
         {
-            var student = _context.Users.Find(studentId);
-            if (student == null)
+            foreach (var studentId in request.StudentIDs)
             {
-                return NotFound(new { message = $"Student with ID {studentId} not found" });
+                var student = _context.Users.Find(studentId);
+                if (student == null)
+                {
+                    return NotFound(new { message = $"Student with ID {studentId} not found" });
+                }
+
+                var classuser = _context.ClassUsers.FirstOrDefault(cu => cu.UserID == studentId);
+                if (classuser == null)
+                {
+                    return NotFound(new { message = "Student is not attended in this classroom" });
+                }
+
+                participants.Add(new LessonParticipant
+                {
+                    LessonID = lesson.ID,
+                    UserID = studentId,
+                    Role = "student"
+                });
             }
-
-            participants.Add(new LessonParticipant
-            {
-                LessonID = lesson.ID,
-                UserID = studentId,
-                Role = "student"
-            });
         }
-
+        
         _context.Lessons.Add(lesson);
         _context.SaveChanges();
         _context.LessonParticipants.AddRange(participants);
