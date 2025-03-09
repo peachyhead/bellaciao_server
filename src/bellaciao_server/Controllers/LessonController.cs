@@ -33,6 +33,12 @@ public class LessonController : ControllerBase
 
         foreach (var studentId in request.StudentIDs)
         {
+            var user = _context.Users.Find(studentId);
+            if (user == null)
+            {
+                return NotFound(new { message = "Student not found" });
+            }
+
             var lessonParticipant = new LessonParticipant
             {
                 LessonID = lesson.ID,
@@ -104,8 +110,15 @@ public class LessonController : ControllerBase
         {
             foreach (var studentId in editRequest.StudentsIncluded)
             {
+                var classuser = _context.ClassUsers.FirstOrDefault(cu => cu.UserID == studentId);
+                if (classuser == null)
+                {
+                    return NotFound(new { message = "Student is not attended in this classroom" });
+                }
+
                 var studentParticipant = _context.LessonParticipants
                     .FirstOrDefault(lp => lp.LessonID == lesson_id && lp.UserID == studentId);
+
                 if (studentParticipant == null)
                 {
                     var newStudentParticipant = new LessonParticipant
@@ -115,6 +128,10 @@ public class LessonController : ControllerBase
                         Role = "student"
                     };
                     _context.LessonParticipants.Add(newStudentParticipant);
+                }
+                else
+                {
+                    return BadRequest(new { message = "Student already in lesson" });
                 }
             }
         }
