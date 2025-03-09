@@ -23,7 +23,7 @@ public class LessonController : ControllerBase
             return BadRequest(new { message = "Room ID is required" });
         }
 
-        if (request == null || string.IsNullOrEmpty(request.TeacherID) || request.StudentIDs == null)
+        if (request == null || string.IsNullOrEmpty(request.TeacherID))
         {
             return BadRequest(new { message = "Invalid request data" });
         }
@@ -46,6 +46,12 @@ public class LessonController : ControllerBase
             return NotFound(new { message = "Teacher not found" });
         }
 
+        var classuser = _context.ClassUsers.FirstOrDefault(cu => cu.UserID == request.TeacherID);
+        if (classuser == null)
+        {
+            return NotFound(new { message = "Teacher is not attended in this classroom" });
+        }
+
         participants.Add(new LessonParticipant
         {
             LessonID = lesson.ID,
@@ -63,8 +69,8 @@ public class LessonController : ControllerBase
                     return NotFound(new { message = $"Student with ID {studentId} not found" });
                 }
 
-                var classuser = _context.ClassUsers.FirstOrDefault(cu => cu.UserID == studentId);
-                if (classuser == null)
+                var classstud = _context.ClassUsers.FirstOrDefault(cu => cu.UserID == studentId);
+                if (classstud == null)
                 {
                     return NotFound(new { message = "Student is not attended in this classroom" });
                 }
