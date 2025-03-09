@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Context;
+using System.Text.Json.Serialization;
 
 [ApiController]
 [Route("api/classroom")]
@@ -19,8 +20,21 @@ public class ClassroomController : ControllerBase
     }
 
     [HttpPost("create")]
-    public ActionResult CreateClassroom([FromBody] Classroom classroom)
+    public ActionResult CreateClassroom([FromBody] ClassroomRequest classroomRequest)
     {
+        var classroom = new Classroom
+        {
+            ID = Guid.NewGuid().ToString(),
+            Title = classroomRequest.Title,
+            HeadID = classroomRequest.HeadID
+        };
+
+        var head = _context.Users.Find(classroom.HeadID);
+        if (head == null)
+        {
+            return NotFound("Head user not found.");
+        }
+
         _context.Classrooms.Add(classroom);
         _context.SaveChanges();
 
@@ -250,6 +264,14 @@ public class ClassroomController : ControllerBase
             .ToList();
 
         return Ok(new { users = userIds });
+    }
+
+    public class ClassroomRequest
+    {
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
+        [JsonPropertyName("head_id")]
+        public string HeadID { get; set; }
     }
 
     public class GetAvailableResponse
