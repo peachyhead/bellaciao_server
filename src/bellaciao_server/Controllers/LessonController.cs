@@ -70,6 +70,11 @@ public class LessonController : ControllerBase
             lesson.PeriodicTime = editRequest.PeriodicTime;
         }
 
+        if (editRequest.Duration != 0)
+        {
+            lesson.Duration = editRequest.Duration;
+        }
+
         if (!string.IsNullOrEmpty(editRequest.Platform))
         {
             lesson.Platform = editRequest.Platform;
@@ -316,6 +321,7 @@ public class LessonEditRequest
 {
     [JsonPropertyName("periodic_time")]
     public long PeriodicTime { get; set; }
+    public int Duration { get; set; }
     public string Platform { get; set; }
     public string TeacherID { get; set; }
     public List<string> StudentsIncluded { get; set; }
