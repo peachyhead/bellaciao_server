@@ -322,11 +322,11 @@ public class LessonEditRequest
     [JsonPropertyName("periodic_time")]
     public long PeriodicTime { get; set; }
     public int Duration { get; set; }
-    public string Platform { get; set; }
+    public string? Platform { get; set; }
     [JsonPropertyName("teacher_id")]
-    public string TeacherID { get; set; }
+    public string? TeacherID { get; set; }
     [JsonPropertyName("students_included")]
-    public List<string> StudentsIncluded { get; set; }
+    public List<string>? StudentsIncluded { get; set; }
     [JsonPropertyName("students_excluded")]
-    public List<string> StudentsExcluded { get; set; }
+    public List<string>? StudentsExcluded { get; set; }
 }
