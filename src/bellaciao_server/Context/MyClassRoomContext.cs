@@ -109,7 +109,6 @@ namespace Context
         public string ID { get; set; }
         public string FullName { get; set; }
         public string Phone { get; set; }
-        // public string Role { get; set; } // Uncomment if Role is needed
     }
 
     public class Classroom
@@ -117,9 +116,44 @@ namespace Context
         public string ID { get; set; }
         public string Title { get; set; }
         public string HeadID { get; set; }
-        // public List<User> Participants { get; set; } // Uncomment if Participants is needed
     }
 
+    public class Lesson
+    {
+        public string ID { get; set; }
+        public string RoomID { get; set; }
+        public string PeriodicType { get; set; }
+        public long PeriodicTime { get; set; }
+        public int Duration { get; set; }
+        public string Platform { get; set; }
+    }
+
+    public class LessonCase
+    {
+        public string ID { get; set; }
+        public string Type { get; set; }
+        public string LessonID { get; set; }
+        public string StudentID { get; set; }
+        public string Description { get; set; }
+        public long CreatedAt { get; set; }
+        public long? OldDate { get; set; }
+        public long? NewDate { get; set; }
+    }
+
+    public class LessonCaseFile
+    {
+        public int ID { get; set; }
+        public string LessonCaseID { get; set; }  // ID из lesson_cases
+        public string FilePath { get; set; }   // Путь к файлу
+    }
+
+    public class LessonParticipant
+    {
+        public int ID { get; set; }
+        public string UserID { get; set; }
+        public string LessonID { get; set; }
+        public string Role { get; set; }
+    }
 
     public class Invitation
     {

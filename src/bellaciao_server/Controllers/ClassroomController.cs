@@ -40,27 +40,40 @@ public class ClassroomController : ControllerBase
         return CreatedAtAction(nameof(GetAllClassrooms), new { classroom.ID }, classroom);
     }
 
-    [HttpPost("add-user")]
-    public ActionResult AddUser([FromBody] User user)
+    [HttpPost("edit-user")]
+    public ActionResult EditUser([FromQuery] string user_id, [FromBody] ClassUserEditRequest editRequest)
     {
-        _context.Users.Add(user);
+        if (string.IsNullOrEmpty(user_id))
+        {
+            return BadRequest("User ID is required.");
+        }
+
+        var user = _context.ClassUsers.FirstOrDefault(u => u.UserID == user_id);
+        if (user == null)
+        {
+            return NotFound("User not found in any classroom.");
+        }
+
+        user.Charge = editRequest.Charge;
         _context.SaveChanges();
-        return CreatedAtAction(nameof(GetUserById), new { user.ID }, user);
+
+        return Ok(new { message = "User charge updated successfully.", user_id = user.UserID, charge = user.Charge });
     }
 
     [HttpGet("get-user")]
-    public ActionResult<User> GetUserById([FromQuery] string id)
+    public ActionResult<ClassUser> GetUserById([FromQuery] string user_id)
     {
-        if (string.IsNullOrEmpty(id))
+        if (string.IsNullOrEmpty(user_id))
         {
-            return BadRequest("ID is required.");
+            return BadRequest("User ID is required.");
         }
 
-        var user = _context.Users.Find(id);
+        var user = _context.ClassUsers.FirstOrDefault(u => u.UserID == user_id);
         if (user == null)
         {
-            return NotFound();
+            return NotFound("User not found in any classroom.");
         }
+
         return Ok(user);
     }
 
@@ -180,5 +193,10 @@ public class ClassroomController : ControllerBase
     public class InviteResponse
     {
         public string invite_id { get; set; }
+    }
+
+        public class ClassUserEditRequest 
+    {
+        public decimal Charge { get; set; }
     }
 }
