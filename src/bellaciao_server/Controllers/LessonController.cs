@@ -38,9 +38,6 @@ public class LessonController : ControllerBase
             Platform = request.Platform,
         };
 
-        _context.Lessons.Add(lesson);
-        _context.SaveChanges();
-
         var participants = new List<LessonParticipant>();
 
         var teacher = _context.Users.Find(request.TeacherID);
@@ -72,6 +69,8 @@ public class LessonController : ControllerBase
             });
         }
 
+        _context.Lessons.Add(lesson);
+        _context.SaveChanges();
         _context.LessonParticipants.AddRange(participants);
         _context.SaveChanges();
 
