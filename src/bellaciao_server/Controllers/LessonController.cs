@@ -100,7 +100,7 @@ public class LessonController : ControllerBase
             }
         }
 
-        if (editRequest.StudentsIncluded != null)
+        if (editRequest.StudentsIncluded.Any())
         {
             foreach (var studentId in editRequest.StudentsIncluded)
             {
@@ -116,14 +116,10 @@ public class LessonController : ControllerBase
                     };
                     _context.LessonParticipants.Add(newStudentParticipant);
                 }
-                else
-                {
-                    return BadRequest(new { message = "Student already in lesson" });
-                }
             }
         }
 
-        if (editRequest.StudentsExcluded != null)
+        if (editRequest.StudentsExcluded.Any())
         {
             foreach (var studentId in editRequest.StudentsExcluded)
             {
@@ -326,7 +322,7 @@ public class LessonEditRequest
     [JsonPropertyName("teacher_id")]
     public string? TeacherID { get; set; }
     [JsonPropertyName("students_included")]
-    public List<string>? StudentsIncluded { get; set; }
+    public List<string> StudentsIncluded { get; set; }
     [JsonPropertyName("students_excluded")]
-    public List<string>? StudentsExcluded { get; set; }
+    public List<string> StudentsExcluded { get; set; }
 }
