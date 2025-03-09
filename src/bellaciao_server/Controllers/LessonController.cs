@@ -18,6 +18,16 @@ public class LessonController : ControllerBase
     [HttpPost("add")]
     public ActionResult AddLesson([FromQuery] string room_id, [FromBody] LessonRequest request)
     {
+        if (string.IsNullOrEmpty(room_id))
+        {
+            return BadRequest(new { message = "Room ID is required" });
+        }
+
+        if (request == null || string.IsNullOrEmpty(request.TeacherID) || request.StudentIDs == null)
+        {
+            return BadRequest(new { message = "Invalid request data" });
+        }
+
         var lesson = new Lesson
         {
             ID = Guid.NewGuid().ToString(),
@@ -28,33 +38,41 @@ public class LessonController : ControllerBase
             Platform = request.Platform,
         };
 
-        foreach (var studentId in request.StudentIDs)
+        _context.Lessons.Add(lesson);
+        _context.SaveChanges();
+
+        var participants = new List<LessonParticipant>();
+
+        var teacher = _context.Users.Find(request.TeacherID);
+        if (teacher == null)
         {
-            var user = _context.Users.Find(studentId);
-            if (user == null)
-            {
-                return NotFound(new { message = "Student not found" });
-            }
-
-            var lessonParticipant = new LessonParticipant
-            {
-                LessonID = lesson.ID,
-                UserID = studentId,
-                Role = "student"
-            };
-
-            _context.LessonParticipants.Add(lessonParticipant);
+            return NotFound(new { message = "Teacher not found" });
         }
 
-        var teacherParticipant = new LessonParticipant
+        participants.Add(new LessonParticipant
         {
             LessonID = lesson.ID,
             UserID = request.TeacherID,
             Role = "teacher"
-        };
+        });
 
-        _context.Lessons.Add(lesson);
-        _context.LessonParticipants.Add(teacherParticipant);
+        foreach (var studentId in request.StudentIDs)
+        {
+            var student = _context.Users.Find(studentId);
+            if (student == null)
+            {
+                return NotFound(new { message = $"Student with ID {studentId} not found" });
+            }
+
+            participants.Add(new LessonParticipant
+            {
+                LessonID = lesson.ID,
+                UserID = studentId,
+                Role = "student"
+            });
+        }
+
+        _context.LessonParticipants.AddRange(participants);
         _context.SaveChanges();
 
         return Ok(new { lesson.ID });
