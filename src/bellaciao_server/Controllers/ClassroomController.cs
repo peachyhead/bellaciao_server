@@ -109,14 +109,14 @@ public class ClassroomController : ControllerBase
             ClassroomID = invitation.ClassroomID,
             UserID = request.user_id,
             Role = invitation.Role,
-            Charge = default 
+            Charge = default
         };
 
         _context.ClassUsers.Add(classUser);
         _context.Invitations.Remove(invitation);
-
         _context.SaveChanges();
-        return Ok("User successfully added to the classroom.");
+
+        return Ok(new { message = "User successfully added to the classroom.", classroom_id = classUser.ClassroomID });
     }
 
     [HttpGet("get-available")]
