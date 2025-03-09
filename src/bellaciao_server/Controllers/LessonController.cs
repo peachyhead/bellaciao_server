@@ -104,6 +104,12 @@ public class LessonController : ControllerBase
 
         if (!string.IsNullOrEmpty(editRequest.TeacherID))
         {
+            var classuser = _context.ClassUsers.FirstOrDefault(cu => cu.UserID == editRequest.TeacherID);
+            if (classuser == null)
+            {
+                return NotFound(new { message = "Student is not attended in this classroom" });
+            }
+
             var teacherParticipant = _context.LessonParticipants
                 .FirstOrDefault(lp => lp.LessonID == lesson_id && lp.Role == "teacher");
             if (teacherParticipant != null)
@@ -133,7 +139,8 @@ public class LessonController : ControllerBase
                 }
 
                 var studentParticipant = _context.LessonParticipants
-                    .FirstOrDefault(lp => lp.LessonID == lesson_id && lp.UserID == studentId);
+                    .FirstOrDefault(lp => lp.LessonID == lesson_id && lp.UserID == studentId &&
+                                         lp.Role == "student");
 
                 if (studentParticipant == null)
                 {
@@ -147,7 +154,7 @@ public class LessonController : ControllerBase
                 }
                 else
                 {
-                    return BadRequest(new { message = "Student already in lesson" });
+                    return BadRequest(new { message = "Student is already in lesson" });
                 }
             }
         }
@@ -156,6 +163,12 @@ public class LessonController : ControllerBase
         {
             foreach (var studentId in editRequest.StudentsExcluded)
             {
+                var classuser = _context.ClassUsers.FirstOrDefault(cu => cu.UserID == studentId);
+                if (classuser == null)
+                {
+                    return NotFound(new { message = "Student is not attended in this classroom" });
+                }
+
                 var studentParticipant = _context.LessonParticipants
                     .FirstOrDefault(lp => lp.LessonID == lesson_id && lp.UserID == studentId);
                 if (studentParticipant != null)
@@ -164,7 +177,7 @@ public class LessonController : ControllerBase
                 }
                 else
                 {
-                    return BadRequest(new { message = "Student not in lesson" });
+                    return BadRequest(new { message = "Student is not in lesson" });
                 }
             }
         }
