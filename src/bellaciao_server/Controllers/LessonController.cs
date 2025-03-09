@@ -210,6 +210,7 @@ public class LessonController : ControllerBase
                     .Where(c => c.LessonID == l.ID)
                     .Select(c => new LessonCaseResponse
                     {
+                        ID = c.ID,
                         Type = c.Type,
                         UserID = c.StudentID,
                         Date = c.CreatedAt,
@@ -334,6 +335,7 @@ public class LessonResponse
 
 public class LessonCaseResponse
 {
+    public string ID { get; set; }
     public string Type { get; set; }
     public string UserID { get; set; }
     public long Date { get; set; }
