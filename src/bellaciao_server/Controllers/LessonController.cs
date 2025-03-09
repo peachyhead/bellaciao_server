@@ -56,6 +56,89 @@ public class LessonController : ControllerBase
         return Ok(new { lesson.ID });
     }
 
+    [HttpPost("edit")]
+    public ActionResult EditLesson([FromQuery] string lesson_id, [FromBody] LessonEditRequest editRequest)
+    {
+        var lesson = _context.Lessons.FirstOrDefault(l => l.ID == lesson_id);
+        if (lesson == null)
+        {
+            return NotFound(new { message = "Lesson not found" });
+        }
+
+        if (editRequest.PeriodicTime != 0)
+        {
+            lesson.PeriodicTime = editRequest.PeriodicTime;
+        }
+
+        if (!string.IsNullOrEmpty(editRequest.Platform))
+        {
+            lesson.Platform = editRequest.Platform;
+        }
+
+        if (!string.IsNullOrEmpty(editRequest.TeacherID))
+        {
+            var teacherParticipant = _context.LessonParticipants
+                .FirstOrDefault(lp => lp.LessonID == lesson_id && lp.Role == "teacher");
+            if (teacherParticipant != null)
+            {
+                teacherParticipant.UserID = editRequest.TeacherID;
+            }
+            else
+            {
+                var newTeacherParticipant = new LessonParticipant
+                {
+                    LessonID = lesson_id,
+                    UserID = editRequest.TeacherID,
+                    Role = "teacher"
+                };
+                _context.LessonParticipants.Add(newTeacherParticipant);
+            }
+        }
+
+        if (editRequest.StudentsIncluded != null)
+        {
+            foreach (var studentId in editRequest.StudentsIncluded)
+            {
+                var studentParticipant = _context.LessonParticipants
+                    .FirstOrDefault(lp => lp.LessonID == lesson_id && lp.UserID == studentId);
+                if (studentParticipant == null)
+                {
+                    var newStudentParticipant = new LessonParticipant
+                    {
+                        LessonID = lesson_id,
+                        UserID = studentId,
+                        Role = "student"
+                    };
+                    _context.LessonParticipants.Add(newStudentParticipant);
+                }
+                else
+                {
+                    return BadRequest(new { message = "Student already in lesson" });
+                }
+            }
+        }
+
+        if (editRequest.StudentsExcluded != null)
+        {
+            foreach (var studentId in editRequest.StudentsExcluded)
+            {
+                var studentParticipant = _context.LessonParticipants
+                    .FirstOrDefault(lp => lp.LessonID == lesson_id && lp.UserID == studentId);
+                if (studentParticipant != null)
+                {
+                    _context.LessonParticipants.Remove(studentParticipant);
+                }
+                else
+                {
+                    return BadRequest(new { message = "Student not in lesson" });
+                }
+            }
+        }
+
+        _context.SaveChanges();
+        return Ok(new { message = "Lesson updated successfully" });
+    }
+
     [HttpGet("get-all")]
     public ActionResult<IEnumerable<LessonResponse>> GetLessonsByRoomId([FromQuery] string room_id)
     {
@@ -69,6 +152,7 @@ public class LessonController : ControllerBase
                     .Select(lp => lp.UserID)
                     .First(),
                 Platform = l.Platform,
+                Duration = l.Duration,
                 StudentIDs = _context.LessonParticipants
                     .Where(lp => lp.LessonID == l.ID && lp.Role == "student")
                     .Select(lp => lp.UserID)
@@ -189,7 +273,6 @@ public class LessonCaseRequest
     public long? NewDate { get; set; }
 }
 
-// DTO для ответа
 public class LessonResponse
 {
     public string LessonID { get; set; }
@@ -198,6 +281,7 @@ public class LessonResponse
     public List<string> StudentIDs { get; set; }
     public string PeriodicType { get; set; }
     public long PeriodicTime { get; set; }
+    public int Duration { get; set; }
     public List<LessonCaseResponse> Cases { get; set; }
 }
 
@@ -212,7 +296,6 @@ public class LessonCaseResponse
     public long? NewDate { get; set; }
 }
 
-// DTO для запроса
 public class LessonRequest
 {
     [JsonPropertyName("periodic_type")]
@@ -227,4 +310,14 @@ public class LessonRequest
     public string TeacherID { get; set; }
     [JsonPropertyName("student_ids")]
     public List<string> StudentIDs { get; set; }
+}
+
+public class LessonEditRequest
+{
+    [JsonPropertyName("periodic_time")]
+    public long PeriodicTime { get; set; }
+    public string Platform { get; set; }
+    public string TeacherID { get; set; }
+    public List<string> StudentsIncluded { get; set; }
+    public List<string> StudentsExcluded { get; set; }
 }

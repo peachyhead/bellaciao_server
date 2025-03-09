@@ -18,14 +18,12 @@ public class ClassroomController : ControllerBase
         return Ok(_context.Classrooms.ToList());
     }
 
-    [HttpPost("create-classroom")]
+    [HttpPost("create")]
     public ActionResult CreateClassroom([FromBody] Classroom classroom)
     {
-        // Добавляем новую комнату в базу
         _context.Classrooms.Add(classroom);
         _context.SaveChanges();
 
-        // Создаем запись в class_users, связывая пользователя head_id с классом
         var classUser = new ClassUser
         {
             ClassroomID = classroom.ID,
@@ -38,6 +36,54 @@ public class ClassroomController : ControllerBase
         _context.SaveChanges();
 
         return CreatedAtAction(nameof(GetAllClassrooms), new { classroom.ID }, classroom);
+    }
+
+    [HttpPost("delete")]
+    public ActionResult DeleteClassroom([FromQuery] string classroom_id)
+    {
+        if (string.IsNullOrEmpty(classroom_id))
+        {
+            return BadRequest("Classroom ID is required.");
+        }
+
+        var classroom = _context.Classrooms.Find(classroom_id);
+        if (classroom == null)
+        {
+            return NotFound("Classroom not found.");
+        }
+
+        var classUsers = _context.ClassUsers.Where(cu => cu.ClassroomID == classroom_id).ToList();
+        _context.ClassUsers.RemoveRange(classUsers);
+
+        var invitations = _context.Invitations.Where(i => i.ClassroomID == classroom_id).ToList();
+        _context.Invitations.RemoveRange(invitations);
+
+        var lessons = _context.Lessons.Where(l => l.RoomID == classroom_id).ToList();
+        if (lessons.Any())
+        {
+            var lessonIds = lessons.Select(l => l.ID).ToList();
+
+            var lessonCases = _context.LessonCases.Where(lc => lessonIds.Contains(lc.LessonID)).ToList();
+            if (lessonCases.Any())
+            {
+                var lessonCaseIds = lessonCases.Select(lc => lc.ID).ToList();
+
+                var lessonCaseFiles = _context.LessonCaseFiles.Where(lcf => lessonCaseIds.Contains(lcf.LessonCaseID)).ToList();
+                _context.LessonCaseFiles.RemoveRange(lessonCaseFiles);
+
+                _context.LessonCases.RemoveRange(lessonCases);
+            }
+
+            var lessonParticipants = _context.LessonParticipants.Where(lp => lessonIds.Contains(lp.LessonID)).ToList();
+            _context.LessonParticipants.RemoveRange(lessonParticipants);
+
+            _context.Lessons.RemoveRange(lessons);
+        }
+
+        _context.Classrooms.Remove(classroom);
+        _context.SaveChanges();
+
+        return Ok(new { message = "Classroom and all related records deleted successfully.", classroom_id });
     }
 
     [HttpPost("edit-user")]
@@ -58,6 +104,44 @@ public class ClassroomController : ControllerBase
         _context.SaveChanges();
 
         return Ok(new { message = "User charge updated successfully.", user_id = user.UserID, charge = user.Charge });
+    }
+
+    [HttpPost("remove-user")]
+    public ActionResult RemoveUser([FromQuery] string user_id, [FromQuery] string classroom_id)
+    {
+        if (string.IsNullOrEmpty(user_id))
+        {
+            return BadRequest("User ID is required.");
+        }
+
+        var user = _context.Users.FirstOrDefault(u => u.ID == user_id);
+        if (user == null)
+        {
+            return NotFound("User not found in any classroom.");
+        }
+
+        var classUser = _context.ClassUsers.FirstOrDefault(u => u.UserID == user_id && u.ClassroomID == classroom_id);
+        if (classUser == null)
+        {
+            return NotFound($"User not found in classroom {classroom_id}");
+        }
+
+        var participant = _context.LessonParticipants.FirstOrDefault(lp => lp.UserID == user_id);
+        if (participant != null)
+        {
+            _context.LessonParticipants.Remove(participant);
+        }
+
+        var cases = _context.LessonCases.Where(lc => lc.StudentID == user_id).ToList();
+        foreach (var lessonCase in cases)
+        {
+            lessonCase.StudentID = user.FullName;
+        }
+
+        _context.ClassUsers.Remove(classUser);
+        _context.SaveChanges();
+
+        return Ok(new { message = "User removed from the classroom.", user_id = classUser.UserID });
     }
 
     [HttpGet("get-user")]
@@ -85,10 +169,8 @@ public class ClassroomController : ControllerBase
             return BadRequest("Role and Classroom ID are required.");
         }
 
-        // Генерируем уникальный ID для приглашения
-        string invitationId = Guid.NewGuid().ToString();
+        var invitationId = Guid.NewGuid().ToString();
 
-        // Здесь можно сохранить приглашение в базу данных, если нужно
         var invite = new Invitation
         {
             ID = invitationId,
@@ -99,7 +181,6 @@ public class ClassroomController : ControllerBase
         _context.Invitations.Add(invite);
         _context.SaveChanges();
 
-        // Возвращаем ID приглашения
         return Ok(new InviteResponse { invite_id = invitationId });
     }
 
@@ -117,8 +198,8 @@ public class ClassroomController : ControllerBase
             return NotFound("Invitation not found.");
         }
 
-        // Проверяем, есть ли уже такой пользователь в классе
-        bool userExists = _context.ClassUsers.Any(cu => cu.ClassroomID == invitation.ClassroomID && cu.UserID == request.user_id);
+        var userExists = _context.ClassUsers.Any(cu => cu.ClassroomID == invitation.ClassroomID && 
+            cu.UserID == request.user_id);
         if (userExists)
         {
             return Conflict(new { message = "User is already in the classroom.", classroom_id = invitation.ClassroomID });
@@ -147,7 +228,6 @@ public class ClassroomController : ControllerBase
             return BadRequest("User ID is required.");
         }
 
-        // Находим все классы, в которых состоит пользователь
         var roomIds = _context.ClassUsers
             .Where(cu => cu.UserID == user_id)
             .Select(cu => cu.ClassroomID)
@@ -164,7 +244,6 @@ public class ClassroomController : ControllerBase
             return BadRequest("role and room_id parameters are required.");
         }
 
-        // Получаем список пользователей по роли и ID комнаты
         var userIds = _context.ClassUsers
             .Where(cu => cu.ClassroomID == room_id && cu.Role == role)
             .Select(cu => cu.UserID)
@@ -173,7 +252,6 @@ public class ClassroomController : ControllerBase
         return Ok(new { users = userIds });
     }
 
-    // Класс для ответа
     public class GetAvailableResponse
     {
         public List<string> RoomIds { get; set; }
@@ -195,7 +273,7 @@ public class ClassroomController : ControllerBase
         public string invite_id { get; set; }
     }
 
-        public class ClassUserEditRequest 
+    public class ClassUserEditRequest 
     {
         public decimal Charge { get; set; }
     }
