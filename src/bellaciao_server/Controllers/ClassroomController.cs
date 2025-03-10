@@ -159,20 +159,28 @@ public class ClassroomController : ControllerBase
     }
 
     [HttpGet("get-user")]
-    public ActionResult<ClassUser> GetUserById([FromQuery] string user_id)
+    public ActionResult<ClassUser> GetUserById([FromQuery] string room_id, [FromQuery] string user_id)
     {
         if (string.IsNullOrEmpty(user_id))
         {
             return BadRequest("User ID is required.");
         }
 
-        var user = _context.ClassUsers.FirstOrDefault(u => u.UserID == user_id);
+        var user = _context.Users.FirstOrDefault(u => u.ID == user_id);
         if (user == null)
         {
             return NotFound("User not found in any classroom.");
         }
 
-        return Ok(user);
+        var classuser = _context.ClassUsers.FirstOrDefault(u => u.UserID == user_id && 
+            u.ClassroomID == room_id);
+            
+        if (classuser == null)
+        {
+            return NotFound("User not found in this classroom.");
+        }
+
+        return Ok(classuser);
     }
 
     [HttpPost("invite")]
