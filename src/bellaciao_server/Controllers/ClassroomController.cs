@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Context;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("api/classroom")]
@@ -53,52 +54,60 @@ public class ClassroomController : ControllerBase
     }
 
     [HttpPost("delete")]
-    public ActionResult DeleteClassroom([FromQuery] string classroom_id)
+public ActionResult DeleteClassroom([FromQuery] string classroom_id)
+{
+    if (string.IsNullOrEmpty(classroom_id))
     {
-        if (string.IsNullOrEmpty(classroom_id))
-        {
-            return BadRequest("Classroom ID is required.");
-        }
-
-        var classroom = _context.Classrooms.Find(classroom_id);
-        if (classroom == null)
-        {
-            return NotFound("Classroom not found.");
-        }
-
-        var classUsers = _context.ClassUsers.Where(cu => cu.ClassroomID == classroom_id).ToList();
-        _context.ClassUsers.RemoveRange(classUsers);
-
-        var invitations = _context.Invitations.Where(i => i.ClassroomID == classroom_id).ToList();
-        _context.Invitations.RemoveRange(invitations);
-
-        var lessons = _context.Lessons.Where(l => l.RoomID == classroom_id).ToList();
-        if (lessons.Any())
-        {
-            var lessonIds = lessons.Select(l => l.ID).ToList();
-
-            var lessonCases = _context.LessonCases.Where(lc => lessonIds.Contains(lc.LessonID)).ToList();
-            if (lessonCases.Any())
-            {
-                var lessonCaseIds = lessonCases.Select(lc => lc.ID).ToList();
-
-                var lessonCaseFiles = _context.LessonCaseFiles.Where(lcf => lessonCaseIds.Contains(lcf.LessonCaseID)).ToList();
-                _context.LessonCaseFiles.RemoveRange(lessonCaseFiles);
-
-                _context.LessonCases.RemoveRange(lessonCases);
-            }
-
-            var lessonParticipants = _context.LessonParticipants.Where(lp => lessonIds.Contains(lp.LessonID)).ToList();
-            _context.LessonParticipants.RemoveRange(lessonParticipants);
-
-            _context.Lessons.RemoveRange(lessons);
-        }
-
-        _context.Classrooms.Remove(classroom);
-        _context.SaveChanges();
-
-        return Ok(new { message = "Classroom and all related records deleted successfully.", classroom_id });
+        return BadRequest(new { message = "Classroom ID is required." });
     }
+
+    var classroom = _context.Classrooms.FirstOrDefault(c => c.ID == classroom_id);
+    if (classroom == null)
+    {
+        return NotFound(new { message = "Classroom not found." });
+    }
+
+    var classUsers = _context.ClassUsers.Where(cu => cu.ClassroomID == classroom_id);
+    if (classUsers.Any()) _context.ClassUsers.RemoveRange(classUsers);
+
+    var invitations = _context.Invitations.Where(i => i.ClassroomID == classroom_id);
+    if (invitations.Any()) _context.Invitations.RemoveRange(invitations);
+
+    var lessons = _context.Lessons.Where(l => l.RoomID == classroom_id).ToList();
+    if (lessons.Any())
+    {
+        var lessonIds = lessons.Select(l => l.ID).ToList();
+
+        var lessonCases = _context.LessonCases.Where(lc => lessonIds.Contains(lc.LessonID)).ToList();
+        if (lessonCases.Any())
+        {
+            var lessonCaseIds = lessonCases.Select(lc => lc.ID).ToList();
+            var lessonCaseFiles = _context.LessonCaseFiles.Where(lcf => lessonCaseIds.Contains(lcf.LessonCaseID));
+            if (lessonCaseFiles.Any()) _context.LessonCaseFiles.RemoveRange(lessonCaseFiles);
+
+            _context.LessonCases.RemoveRange(lessonCases);
+        }
+
+        var lessonParticipants = _context.LessonParticipants.Where(lp => lessonIds.Contains(lp.LessonID));
+        if (lessonParticipants.Any()) 
+        _context.LessonParticipants.RemoveRange(lessonParticipants);
+
+        _context.Lessons.RemoveRange(lessons);
+    }
+
+    _context.Classrooms.Remove(classroom);
+
+    try
+    {
+        _context.SaveChanges();
+    }
+    catch (DbUpdateConcurrencyException ex)
+    {
+        return StatusCode(500, new { message = "Error deleting classroom. It may have already been removed.", details = ex.Message });
+    }
+
+    return Ok(new { message = "Classroom and all related records deleted successfully.", classroom_id });
+}
 
     [HttpPost("edit-user")]
     public ActionResult EditUser([FromQuery] string user_id, [FromBody] ClassUserEditRequest editRequest)
@@ -174,7 +183,7 @@ public class ClassroomController : ControllerBase
 
         var classuser = _context.ClassUsers.FirstOrDefault(u => u.UserID == user_id && 
             u.ClassroomID == room_id);
-            
+
         if (classuser == null)
         {
             return NotFound("User not found in this classroom.");
