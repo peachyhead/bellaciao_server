@@ -11,7 +11,6 @@ builder.WebHost.ConfigureKestrel(options =>
     });
 });
 
-// Configure services
 builder.Services.AddDbContext<MyClassroomContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -28,13 +27,11 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 }
 
-// Включаем CORS перед обработкой запросов
 app.UseCors("AllowAll");
 app.UseRouting();
 app.UseHttpsRedirection();
