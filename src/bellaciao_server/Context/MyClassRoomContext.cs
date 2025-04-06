@@ -46,6 +46,7 @@ namespace Context
                 entity.Property(e => e.ID).HasColumnName("id");
                 entity.Property(e => e.Role).HasColumnName("role");
                 entity.Property(e => e.ClassroomID).HasColumnName("classroom_id");
+                entity.Property(e => e.Charge).HasColumnName("charge");
             });
 
             modelBuilder.Entity<ClassUser>(entity =>
@@ -89,8 +90,9 @@ namespace Context
                 entity.Property(e => e.LessonID).HasColumnName("lesson_id");
                 entity.Property(e => e.StudentID).HasColumnName("student_id");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at");
-                entity.Property(e => e.NewDate).HasColumnName("new_date");
-                entity.Property(e => e.OldDate).HasColumnName("old_date");
+                entity.Property(e => e.LessonDate).HasColumnName("lesson_date");
+                entity.Property(e => e.PeriodicTime).HasColumnName("periodic_time");
+                entity.Property(e => e.PeriodicType).HasColumnName("periodic_type");
                 entity.Property(e => e.Description).HasColumnName("description");
             });
 
@@ -131,21 +133,22 @@ namespace Context
 
     public class LessonCase
     {
-        public string ID { get; set; }
-        public string Type { get; set; }
-        public string LessonID { get; set; }
-        public string StudentID { get; set; }
-        public string Description { get; set; }
-        public long CreatedAt { get; set; }
-        public long? OldDate { get; set; }
-        public long? NewDate { get; set; }
+        public required string ID { get; set; }
+        public required string Type { get; set; }
+        public required string LessonID { get; set; }
+        public required string StudentID { get; set; }
+        public required long CreatedAt { get; set; }
+        public required long LessonDate { get; set; }
+        public string? Description { get; set; }
+        public string? PeriodicType { get; set; }
+        public long? PeriodicTime { get; set; }
     }
 
     public class LessonCaseFile
     {
         public int ID { get; set; }
-        public string LessonCaseID { get; set; }  // ID из lesson_cases
-        public string FilePath { get; set; }   // Путь к файлу
+        public required string LessonCaseID { get; set; }
+        public required string FilePath { get; set; }
     }
 
     public class LessonParticipant
@@ -161,6 +164,7 @@ namespace Context
         public string ID { get; set; }
         public string Role { get; set; }
         public string ClassroomID { get; set; }
+        public decimal Charge { get; set; }
     }
 
     public class ClassUser

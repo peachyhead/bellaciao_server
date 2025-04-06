@@ -20,8 +20,8 @@ public class UserController : ControllerBase
         return CreatedAtAction(nameof(GetUserById), new { user.ID }, user);
     }
 
-    [HttpGet("get")]
-    public ActionResult<User> GetUserById([FromQuery] string id)
+    [HttpGet("{id}/get")]
+    public ActionResult<User> GetUserById(string id)
     {
         if (string.IsNullOrEmpty(id))
         {
@@ -34,5 +34,25 @@ public class UserController : ControllerBase
             return NotFound();
         }
         return Ok(user);
+    }
+
+
+    [HttpGet("{id}/available-classrooms")]
+    public ActionResult<List<Classroom>> GetAvailableClassrooms(string id)
+    {
+        if (string.IsNullOrEmpty(id))
+            return BadRequest("User ID is required.");
+
+        var allClassrooms = _context.Classrooms.ToList();
+        var userClassrooms = _context.ClassUsers
+            .Where(cu => cu.UserID == id)
+            .Select(cu => cu.ClassroomID)
+            .ToHashSet();
+
+        var availableClassrooms = allClassrooms
+            .Where(c => !userClassrooms.Contains(c.ID))
+            .ToList();
+
+        return Ok(availableClassrooms);
     }
 }
