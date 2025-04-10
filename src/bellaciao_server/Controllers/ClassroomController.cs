@@ -14,9 +14,27 @@ public class ClassroomController : ControllerBase
         _context = context;
     }
 
-    private ActionResult<List<Classroom>> GetAllClassrooms()
+    [HttpGet("get")]
+    public ActionResult<List<Classroom>> GetAllClassrooms()
     {
         return Ok(_context.Classrooms.ToList());
+    }
+
+    [HttpGet("{id}/get")]
+    public ActionResult<Classroom> GetById(string id)
+    {
+        if (string.IsNullOrEmpty(id))
+        {
+            return BadRequest(new { message = "Classroom ID is required." });
+        }
+
+        var classroom = _context.Classrooms.FirstOrDefault(c => c.ID == id);
+        if (classroom == null)
+        {
+            return NotFound(new { message = "Classroom not found." });
+        }
+        
+        return Ok(classroom);
     }
 
     [HttpPut("add")]

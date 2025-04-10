@@ -13,7 +13,7 @@ public class LessonController : ControllerBase
         _context = context;
     }
 
-    [HttpPost("add")]
+    [HttpPut("add")]
     public ActionResult AddLesson(string room_id, [FromBody] LessonRequest request)
     {
         if (string.IsNullOrEmpty(room_id))
@@ -197,6 +197,36 @@ public class LessonController : ControllerBase
 
         _context.SaveChanges();
         return Ok(new { message = "Lesson updated successfully" });
+    }
+
+    [HttpGet("{id}/get")]
+    public ActionResult<IEnumerable<LessonResponse>> GetLessonsByRoomId(string room_id, string id)
+    {
+        var lessons = _context.Lessons
+            .Where(l => l.RoomID == room_id)
+            .Where(l => l.ID == id)
+            .Select(l => new LessonResponse
+            {
+                LessonID = l.ID,
+                TeacherID = _context.LessonParticipants
+                    .Where(lp => lp.LessonID == l.ID && lp.Role == "teacher")
+                    .Select(lp => lp.UserID)
+                    .First(),
+                Platform = l.Platform,
+                Duration = l.Duration,
+                StudentIDs = _context.LessonParticipants
+                    .Where(lp => lp.LessonID == l.ID && lp.Role == "student")
+                    .Select(lp => lp.UserID)
+                    .ToList(),
+                PeriodicType = l.PeriodicType,
+                PeriodicTime = l.PeriodicTime,
+                Cases = _context.LessonCases
+                    .Where(c => c.LessonID == l.ID)
+                    .ToList()
+        })
+        .ToList();
+
+        return Ok(lessons);
     }
 
     [HttpGet("get")]
