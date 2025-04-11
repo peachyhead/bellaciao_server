@@ -81,7 +81,7 @@ public class ClassroomController : ControllerBase
         var classroom = _context.Classrooms.FirstOrDefault(c => c.ID == id);
         if (classroom == null)
         {
-            return NotFound(new { message = "Classroom not found." });
+            return NotFound(new { message = $"Classroom {id} not found." });
         }
 
         var classUsers = _context.ClassUsers.Where(cu => cu.ClassroomID == id);

@@ -12,7 +12,7 @@ public class UserController : ControllerBase
         _context = context;
     }
 
-    [HttpPost("add")]
+    [HttpPut("add")]
     public ActionResult AddUser([FromBody] User user)
     {
         _context.Users.Add(user);
@@ -46,11 +46,10 @@ public class UserController : ControllerBase
         var allClassrooms = _context.Classrooms.ToList();
         var userClassrooms = _context.ClassUsers
             .Where(cu => cu.UserID == id)
-            .Select(cu => cu.ClassroomID)
-            .ToHashSet();
+            .Select(cu => cu.ClassroomID);
 
         var availableClassrooms = allClassrooms
-            .Where(c => !userClassrooms.Contains(c.ID))
+            .Where(c => userClassrooms.Contains(c.ID))
             .ToList();
 
         return Ok(availableClassrooms);
