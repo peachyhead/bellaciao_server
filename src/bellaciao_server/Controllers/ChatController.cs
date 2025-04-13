@@ -16,11 +16,16 @@ public class ChatController : ControllerBase
         _context = db;
     }
 
-    [HttpGet("{chatId}/messages")]
-    public async Task<IActionResult> GetMessages(string chatId)
+    [HttpGet("{chat_id}/messages")]
+    public async Task<IActionResult> GetMessages(string chat_id)
     {
+        if (string.IsNullOrEmpty(chat_id))
+        {
+            return BadRequest("Chat ID is required.");
+        }
+
         var messages = await _context.Messages
-            .Where(m => m.ChatID == chatId)
+            .Where(m => m.ChatID == chat_id)
             .OrderBy(m => m.CreatedAt)
             .ToListAsync();
 
@@ -30,6 +35,11 @@ public class ChatController : ControllerBase
     [HttpPost("{chat_id}/messages")]
     public async Task<IActionResult> PostMessage(string chat_id, [FromBody] Message message)
     {
+        if (string.IsNullOrEmpty(chat_id))
+        {
+            return BadRequest("Chat ID is required.");
+        }
+
         message.ID = Guid.NewGuid().ToString();
         message.ChatID = chat_id;
         message.CreatedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
