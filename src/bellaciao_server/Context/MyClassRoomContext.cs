@@ -7,10 +7,11 @@ namespace Context
         public MyClassroomContext(DbContextOptions<MyClassroomContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
-        
         public DbSet<Classroom> Classrooms { get; set; }
         public DbSet<Invitation> Invitations { get; set; }
         public DbSet<ClassUser> ClassUsers {get; set; }
+        public DbSet<Chat> Chats { get; set; }
+        public DbSet<Message> Messages { get; set; }
 
         public DbSet<Lesson> Lessons {get; set; }
         public DbSet<LessonParticipant> LessonParticipants {get; set; }
@@ -104,7 +105,47 @@ namespace Context
                 entity.Property(e => e.LessonCaseID).HasColumnName("lesson_case_id");
                 entity.Property(e => e.FilePath).HasColumnName("file_path");
             });
+
+            modelBuilder.Entity<Chat>(entity => 
+            {
+                entity.ToTable("chats");
+                entity.HasKey(e => e.ID);
+                entity.Property(e => e.ID).HasColumnName("id");
+                entity.Property(e => e.Name).HasColumnName("name");
+                entity.Property(e => e.UserID).HasColumnName("user_id");
+                entity.Property(e => e.LastMessage).HasColumnName("last_message");
+                entity.Property(e => e.LastMessageTime).HasColumnName("last_message_time");
+            });
+
+            modelBuilder.Entity<Message>(entity => 
+            {
+                entity.ToTable("messages");
+                entity.HasKey(e => e.ID);
+                entity.Property(e => e.ID).HasColumnName("id");
+                entity.Property(e => e.Text).HasColumnName("text");
+                entity.Property(e => e.ChatID).HasColumnName("chat_id");
+                entity.Property(e => e.AuthorID).HasColumnName("author_id");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            });
         }
+    }
+
+    public class Chat
+    {
+        public string ID { get; set; }
+        public string UserID { get; set; }
+        public string Name { get; set; }
+        public string? LastMessage { get; set; }
+        public long? LastMessageTime { get; set; }
+    }
+
+    public class Message
+    {
+        public string ID { get; set; }
+        public string ChatID { get; set; }
+        public string AuthorID { get; set; }
+        public string Text { get; set; }
+        public long CreatedAt { get; set; }
     }
 
     public class User

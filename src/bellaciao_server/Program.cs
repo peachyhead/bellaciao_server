@@ -40,4 +40,7 @@ app.UseEndpoints(endpoints =>
     endpoints.MapControllers();
 });
 
+app.UseWebSockets();
+app.UseMiddleware<WebSocketMiddleware>();
+
 app.Run("https://0.0.0.0:5000");

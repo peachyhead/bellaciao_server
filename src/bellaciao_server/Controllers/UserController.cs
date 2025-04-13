@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Context;
+using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("api/user")]
@@ -53,5 +54,16 @@ public class UserController : ControllerBase
             .ToList();
 
         return Ok(availableClassrooms);
+    }
+
+    [HttpGet("{id}/chats")]
+    public async Task<IActionResult> GetChats(string id)
+    {
+        var chats = await _context.Chats
+            .Where(c => c.UserID == id)
+            .OrderByDescending(c => c.LastMessageTime)
+            .ToListAsync();
+
+        return Ok(chats);
     }
 }
