@@ -23,8 +23,8 @@ public class ChatController : ControllerBase
         {
             ID = Guid.NewGuid().ToString(),
             Name = chatRequest.Name,
-            LastMessage = chatRequest.LastMessage,
-            LastMessageTime = chatRequest.LastMessageTime
+            LastMessage = null,
+            LastMessageTime = null
         };
 
         _context.Chats.Add(chat);
@@ -83,8 +83,8 @@ public class ChatController : ControllerBase
     }
 
     [HttpPut]
-    [Route("{chat_id}/messages/edit")]
-    public async Task<IActionResult> EditMessage(string chat_id, [FromQuery] string message_id, 
+    [Route("{chat_id}/messages/{message_id}/edit")]
+    public async Task<IActionResult> EditMessage(string chat_id, string message_id, 
         [FromBody] EditMessageRequest request)
     {
         if (string.IsNullOrEmpty(chat_id))
@@ -104,8 +104,8 @@ public class ChatController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("{chat_id}/messages/delete")]
-    public async Task<IActionResult> DeleteMessage(string chat_id, [FromQuery] string message_id)
+    [Route("{chat_id}/messages/{message_id}/delete")]
+    public async Task<IActionResult> DeleteMessage(string chat_id, string message_id)
     {
         if (message_id == null)
             return BadRequest("Chat ID is required.");
@@ -178,8 +178,6 @@ public class EditMessageRequest
 public class ChatRequest
 {
     public string Name { get; set; }
-    public string? LastMessage { get; set; }
-    public long? LastMessageTime { get; set; }
 }
 
 public class MessageRequest
