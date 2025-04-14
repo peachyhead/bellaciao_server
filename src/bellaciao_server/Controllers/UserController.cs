@@ -37,7 +37,6 @@ public class UserController : ControllerBase
         return Ok(user);
     }
 
-
     [HttpGet("{id}/available-classrooms")]
     public ActionResult<List<Classroom>> GetAvailableClassrooms(string id)
     {
@@ -59,11 +58,42 @@ public class UserController : ControllerBase
     [HttpGet("{id}/chats")]
     public async Task<IActionResult> GetChats(string id)
     {
-        var chats = await _context.Chats
+        var chatsParticipant = await _context.ChatParticipants
             .Where(c => c.UserID == id)
-            .OrderByDescending(c => c.LastMessageTime)
             .ToListAsync();
+        if (chatsParticipant == null || !chatsParticipant.Any())
+        {
+            return NotFound("No chats found for this user.");
+        }
 
-        return Ok(chats);
+        var response = chatsParticipant
+            .Select(c => {
+                var chat = _context.Chats
+                    .Where(ch => ch.ID == c.ChatID)
+                    .FirstOrDefault();
+                if (chat == null)
+                {
+                    return null;
+                }
+                var response = new ChatResponse
+                {
+                    Chat = chat,
+                    Users = _context.ChatParticipants
+                        .Where(cp => cp.ChatID == c.ChatID)
+                        .Select(cp => cp.UserID)
+                        .ToList(),
+                    LastMessageViewed = c.LastMessageViewed
+                };
+                return response;
+            });
+        
+        return Ok(response);
     }
+}
+
+public class ChatResponse
+{
+    public Chat Chat { get; set; }
+    public List<string> Users { get; set; }
+    public string LastMessageViewed { get; set; }
 }
