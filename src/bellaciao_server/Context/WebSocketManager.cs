@@ -112,6 +112,8 @@ public static class WebSocketManager
             chat.LastMessageTime = message.CreatedAt;
         }
 
+        var author = await dbContext.Users.FindAsync(message.AuthorID);
+
         await dbContext.SaveChangesAsync();
 
         var response = JsonSerializer.Serialize(new
@@ -121,7 +123,7 @@ public static class WebSocketManager
             {
                 message.ID,
                 message.ChatID,
-                message.AuthorID,
+                author,
                 message.Text,
                 message.CreatedAt
             }
