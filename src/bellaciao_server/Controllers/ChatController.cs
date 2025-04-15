@@ -81,7 +81,7 @@ public class MessageResponse
 {
     [JsonPropertyName("id")]
     public string ID { get; set; }
-    [JsonPropertyName("author_id")]
+    [JsonPropertyName("author")]
     public User Author { get; set; }
     [JsonPropertyName("text")]
     public string Text { get; set; }

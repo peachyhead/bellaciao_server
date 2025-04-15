@@ -4,10 +4,10 @@ using System.Text.Json;
 using System.Collections.Concurrent;
 using Context;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Encodings.Web;
 
 public static class WebSocketManager
 {
-    // Активные подключения: ChatID -> список сокетов
     private static readonly ConcurrentDictionary<string, List<WebSocket>> _chatSockets = new();
     
     public static void AddSocket(string chatId, WebSocket socket)
@@ -43,6 +43,7 @@ public static class WebSocketManager
 
         List<WebSocket> disconnected = new();
 
+        Console.WriteLine($"Broadcasting message to chat {chatId}: {message}");
         foreach (var socket in sockets)
         {
             if (socket.State == WebSocketState.Open)
@@ -116,18 +117,24 @@ public static class WebSocketManager
 
         await dbContext.SaveChangesAsync();
 
+        var options = new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+
         var response = JsonSerializer.Serialize(new
         {
             type = "new_message",
             data = new
             {
-                message.ID,
-                message.ChatID,
+                message_id = message.ID,
+                chat_id = message.ChatID,
                 author,
-                message.Text,
-                message.CreatedAt
+                text = message.Text,
+                created_at = message.CreatedAt
             }
-        });
+        }, options);
 
         await BroadcastToChatAsync(chatId, response);
     }
@@ -151,9 +158,9 @@ public static class WebSocketManager
             type = "edit_message",
             data = new
             {
-                message.ID,
-                message.ChatID,
-                message.Text
+                message_id = message.ID,
+                chat_id = message.ChatID,
+                text = message.Text
             }
         });
 
