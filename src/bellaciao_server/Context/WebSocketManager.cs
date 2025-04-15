@@ -71,6 +71,7 @@ public static class WebSocketManager
 
         string type = typeElement.GetString();
 
+        Console.WriteLine($"Received message of type: {type}.\nData: {data}");
         switch (type)
         {
             case "send_message":
