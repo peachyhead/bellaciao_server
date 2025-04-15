@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 using Context;
 
@@ -174,22 +175,22 @@ public class ChatController : ControllerBase
 
 public class EditMessageRequest
 {
-    [JsonProperty("text")]
+    [JsonPropertyName("text")]
     public string Text { get; set; }
 }
 
 public class ChatRequest
 {
-    [JsonProperty("name")]
+    [JsonPropertyName("name")]
     public string Name { get; set; }
 }
 
 public class MessageRequest
 {
-    [JsonProperty("author_id")]
+    [JsonPropertyName("author_id")]
     public string AuthorID { get; set; }
-    [JsonProperty("text")]
+    [JsonPropertyName("text")]
     public string Text { get; set; }
-    [JsonProperty("created_at")]
+    [JsonPropertyName("created_at")]
     public long CreatedAt { get; set; }
 }
