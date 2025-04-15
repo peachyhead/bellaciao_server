@@ -5,6 +5,8 @@ using Context;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+using Newtonsoft.Json;
+
 [ApiController]
 [Route("api/chat")]
 public class ChatController : ControllerBase
@@ -160,7 +162,7 @@ public class ChatController : ControllerBase
             message.CreatedAt
         };
 
-        await WebSocketManager.BroadcastToChatAsync(chat_id, JsonSerializer.Serialize(new
+        await WebSocketManager.BroadcastToChatAsync(chat_id, System.Text.Json.JsonSerializer.Serialize(new
         {
             type = "new_message",
             data = messageDto
@@ -172,18 +174,22 @@ public class ChatController : ControllerBase
 
 public class EditMessageRequest
 {
+    [JsonProperty("text")]
     public string Text { get; set; }
 }
 
 public class ChatRequest
 {
+    [JsonProperty("name")]
     public string Name { get; set; }
 }
 
 public class MessageRequest
 {
-    public string ChatID { get; set; }
+    [JsonProperty("author_id")]
     public string AuthorID { get; set; }
+    [JsonProperty("text")]
     public string Text { get; set; }
+    [JsonProperty("created_at")]
     public long CreatedAt { get; set; }
 }
