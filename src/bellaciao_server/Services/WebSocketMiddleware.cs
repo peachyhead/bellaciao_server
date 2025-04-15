@@ -1,5 +1,6 @@
 using System.Net.WebSockets;
 using System.Text;
+using Context;
 
 public class WebSocketMiddleware
 {
@@ -14,27 +15,42 @@ public class WebSocketMiddleware
     {
         if (context.Request.Path == "/ws" && context.WebSockets.IsWebSocketRequest)
         {
-            var socket = await context.WebSockets.AcceptWebSocketAsync();
+            using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
 
-            // Ожидаем первое сообщение с chatId
+            // Получаем первое сообщение — chatId
             var buffer = new byte[1024 * 4];
-            var result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-
+            var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             var chatId = Encoding.UTF8.GetString(buffer, 0, result.Count);
-            var id = Guid.NewGuid();
-            WebSocketManager.AddSocket(chatId, socket);
+
+            // Добавляем сокет
+            WebSocketManager.AddSocket(chatId, webSocket);
 
             try
             {
                 while (!result.CloseStatus.HasValue)
                 {
-                    result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+                    if (result.MessageType == WebSocketMessageType.Text)
+                    {
+                        var messageJson = Encoding.UTF8.GetString(buffer, 0, result.Count);
+
+                        // Получаем scoped dbContext
+                        using var scope = context.RequestServices.CreateScope();
+                        var dbContext = scope.ServiceProvider.GetRequiredService<MyClassroomContext>();
+
+                        await WebSocketManager.HandleMessageAsync(messageJson, chatId, dbContext);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"WebSocket error: {ex.Message}");
             }
             finally
             {
-                WebSocketManager.RemoveSocket(chatId, id);
-                await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by client", CancellationToken.None);
+                WebSocketManager.RemoveSocket(chatId, webSocket);
+                await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed", CancellationToken.None);
             }
         }
         else
