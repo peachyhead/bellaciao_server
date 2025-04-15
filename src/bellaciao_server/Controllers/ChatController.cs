@@ -42,6 +42,13 @@ public class ChatController : ControllerBase
         var messages = await _context.Messages
             .Where(m => m.ChatID == chat_id)
             .OrderBy(m => m.CreatedAt)
+            .Select(m => new MessageResponse
+            {
+                ID = m.ID,
+                Author = _context.Users.FirstOrDefault(u => u.ID == m.AuthorID),
+                Text = m.Text,
+                CreatedAt = m.CreatedAt
+            })
             .ToListAsync();
 
         return Ok(messages);
@@ -64,6 +71,18 @@ public class MessageRequest
 {
     [JsonPropertyName("author_id")]
     public string AuthorID { get; set; }
+    [JsonPropertyName("text")]
+    public string Text { get; set; }
+    [JsonPropertyName("created_at")]
+    public long CreatedAt { get; set; }
+}
+
+public class MessageResponse
+{
+    [JsonPropertyName("id")]
+    public string ID { get; set; }
+    [JsonPropertyName("author_id")]
+    public User Author { get; set; }
     [JsonPropertyName("text")]
     public string Text { get; set; }
     [JsonPropertyName("created_at")]
